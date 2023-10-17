@@ -10,10 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
-public class CustomUserService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     UserRepository userRepository;
@@ -24,7 +22,7 @@ public class CustomUserService implements UserDetailsService {
             throw new UsernameNotFoundException("Invalid user.");
         }
         final String uname = username.trim();
-        User userFromDB = userRepository.findByUsername(uname);
+        User userFromDB = userRepository.findByEmail(uname);
 
         if (userFromDB == null) {
             throw new UsernameNotFoundException(String.format("Given user(%s) not found.", username));
@@ -35,10 +33,15 @@ public class CustomUserService implements UserDetailsService {
 //            grantedAuthorities.add(new SimpleGrantedAuthority(role.getAuthority()));
 //        }
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(userFromDB.getUsername())
+//        return org.springframework.security.core.userdetails.User.builder()
+//                .username(userFromDB.getUsername())
+//                .password(userFromDB.getPassword())
+//                .authorities(new SimpleGrantedAuthority(userFromDB.getRole().getAuthority()))
+//                .build();
+
+        return User.builder()
+                .email(userFromDB.getEmail())
                 .password(userFromDB.getPassword())
-                .authorities(new SimpleGrantedAuthority(userFromDB.getRole().getAuthority()))
                 .build();
     }
 

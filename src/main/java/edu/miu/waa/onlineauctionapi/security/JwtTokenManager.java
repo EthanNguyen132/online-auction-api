@@ -33,7 +33,9 @@ public class JwtTokenManager {
                 .withClaim(
                         ROLE_CLAIM,
                         principal.getAuthorities().stream()
-                                .map(GrantedAuthority::getAuthority)
+                        .map(e -> {
+                        	return e.getAuthority();
+                        })
                                 .collect(toList())) // ADMIN/SELLER/CUSTOMER
                 .withIssuedAt(issueDate)
                 .withExpiresAt(expiryDate)

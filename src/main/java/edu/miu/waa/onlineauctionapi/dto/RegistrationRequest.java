@@ -1,5 +1,6 @@
 package edu.miu.waa.onlineauctionapi.dto;
 
+import edu.miu.waa.onlineauctionapi.security.RoleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
+public class RegistrationRequest {
+
     private String email;
     private String password;
+    private RoleEnum role;
 }

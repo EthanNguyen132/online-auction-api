@@ -1,16 +1,80 @@
 package edu.miu.waa.onlineauctionapi.model;
 
-import edu.miu.waa.onlineauctionapi.security.RoleEnum;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.NaturalId;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class User {
-    private String username;
-    private String password;
-    private RoleEnum role;
+@ToString
+@Entity
+public class User implements UserDetails {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // helper method to add new role
-//    public void addRole(String role)
+    @NaturalId
+    private String email;
+
+    private String password;
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<UserRole> userRoles = new ArrayList<>();
+
+    public boolean addUserRole(UserRole ur) {
+        if (userRoles.add(ur)) {
+            ur.setUser(this);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return userRoles.stream()
+                .map(ur -> {
+                	return new SimpleGrantedAuthority(ur.getRole().getRole().name()); 
+                	// make sure GA has no ROLE_PREFIX because we config AUTHORITY_PREFIX as 'ROLE_'
+                })
+                .toList();
+        // return user role name in subject, i.e. ROLE_ADMIN/ROLE_SELLER
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
