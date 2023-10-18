@@ -59,6 +59,8 @@ public class SecurityConfig {
 
 	@Value("${app.security.jwt.private-key-passphrase}")
 	private String privateKeyPassphrase;
+	
+	private CorsConfigurationSource corsConfigurationSource;
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
@@ -69,20 +71,19 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.httpBasic(httpBasic -> httpBasic.disable()).formLogin(formLogin -> formLogin.disable())
-				.csrf(csrf -> csrf.disable()).exceptionHandling(
+				.csrf(csrf -> csrf.disable())
+				.cors(cors -> cors.configurationSource(corsConfigurationSource))
+				.exceptionHandling(
 						exceptionHandling -> exceptionHandling.authenticationEntryPoint((request, response, ex) -> {
 							response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
 						}))
 				.authorizeHttpRequests(req -> req
 						.requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.POST.name())).permitAll()
 						.requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name())).permitAll()
-
 						.requestMatchers(SIGNUP_ADMIN_URL).hasAuthority(RoleEnum.ADMIN.getAuthority())
 						.requestMatchers(ADMIN_URLs).hasAuthority(RoleEnum.ADMIN.getAuthority())
-						
 						.requestMatchers(new AntPathRequestMatcher(PRODUCTS_URLs, HttpMethod.GET.name()))
 						.hasAnyAuthority(RoleEnum.SELLER.getAuthority(), RoleEnum.CUSTOMER.getAuthority())
-
 						.requestMatchers("/test/**").permitAll()
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer
@@ -98,21 +99,6 @@ public class SecurityConfig {
 		JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
 		converter.setJwtGrantedAuthoritiesConverter(authorityConverter);
 		return converter;
-	}
-
-	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("*"));
-		configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH"));
-		// configuration.setAllowCredentials(true);
-		// For CORS response headers
-		configuration.addAllowedOrigin("*");
-		configuration.addAllowedHeader("*");
-		configuration.addAllowedMethod("*");
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
 	}
 
 	@Bean
