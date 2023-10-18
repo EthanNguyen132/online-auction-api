@@ -10,12 +10,10 @@ import org.springframework.web.context.request.WebRequest;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
-    @ExceptionHandler(value = {RecordNotFoundException.class})
-    @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ErrorResponse resourceNotFoundException(RecordNotFoundException ex, WebRequest request) {
-        ErrorResponse message = ErrorResponse.create(
-                ex, HttpStatus.NOT_FOUND, "Record Not Found!"
-        );
-        return message;
-    }
+  @ExceptionHandler(value = {RecordNotFoundException.class})
+  @ResponseStatus(value = HttpStatus.NOT_FOUND)
+  public ErrorResponse resourceNotFoundException(RecordNotFoundException ex, WebRequest request) {
+    ErrorResponse message = ErrorResponse.create(ex, HttpStatus.NOT_FOUND, "Record Not Found!");
+    return message;
+  }
 }

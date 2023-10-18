@@ -10,17 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("test")
 public class TestEmailController {
-    private final EmailService emailService;
+  private final EmailService emailService;
 
-    @PostMapping("/sendMail")
-    public String sendMail(@RequestBody EmailDetails details) {
-        String status = emailService.sendSimpleMail(details);
-        return status;
-    }
+  @PostMapping("/sendMail")
+  public String sendMail(@RequestBody EmailDetails details) {
+    String status = emailService.sendSimpleMail(details);
+    return status;
+  }
 
-    @PostMapping("/sendMailWithAttachment")
-    public String sendMailWithAttachment(@RequestBody EmailDetails details) {
-        String status  = emailService.sendMailWithAttachment(details);
-        return status;
-    }
+  @PostMapping("/sendMailWithAttachment")
+  public String sendMailWithAttachment(@RequestBody EmailDetails details) {
+    String status = emailService.sendMailWithAttachment(details);
+    return status;
+  }
 }

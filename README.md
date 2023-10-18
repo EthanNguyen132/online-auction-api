@@ -23,7 +23,6 @@ Customer Module:
 - Search Product
 - Auction Products: Only verified customer can able to view auction to bidding for product.
 - Customer must make a deposit before bidding, the deposit is 10% of the starting price by default. As a seller, it can set a deposit amount.
-
 - View bid history including all bidding prices, bidding item, etc. bidding history is organized monthly, yearly.
 - As winner of a bidding, be able to print the invoice.
 
@@ -64,7 +63,6 @@ Bidding System
 - If not paid, charge deposit only
 - Seller must ship the item in 3 days after customer pays. If not shipped, return deposit. Seller receives the full amount of money only after customer receive the item or in 30 days after shipping.
 
-
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -76,6 +74,7 @@ Before you begin, ensure you have the following installed:
 ## Build the Application
 
 To build the Spring Boot application and create a JAR file, run the following Maven command in the project directory:
+
 ```
 mvn clean package
 ```
@@ -89,6 +88,8 @@ java -jar target/online-auction-api-1.0.0.jar
 ```
 
 To run the Spring Boot application with mvn plugin (mvn package not required)
+
 ```
 mvn spring-boot:run
 ```
+

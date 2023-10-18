@@ -12,13 +12,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TokenResponse {
 
-    @JsonProperty("token_type")
-    private final String tokenType = "Bearer";
+  @JsonProperty("token_type")
+  private final String tokenType = "Bearer";
 
-    @JsonProperty("access_token")
-    private String accessToken;
+  @JsonProperty("access_token")
+  private String accessToken;
 
-    @JsonProperty("expires_in")
-    private Long expiresIn;
-
+  @JsonProperty("expires_in")
+  private Long expiresIn;
 }

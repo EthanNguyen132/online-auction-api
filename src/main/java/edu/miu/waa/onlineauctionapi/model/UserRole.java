@@ -11,19 +11,16 @@ import lombok.*;
 @Entity
 public class UserRole {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JsonBackReference
-    private User user;
+  @ManyToOne @JsonBackReference private User user;
 
-    @ManyToOne
-    private Role role;
+  @ManyToOne private Role role;
 
-    public UserRole(User user, Role role) {
-        this.user = user;
-        this.role = role;
-    }
+  public UserRole(User user, Role role) {
+    this.user = user;
+    this.role = role;
+  }
 }
