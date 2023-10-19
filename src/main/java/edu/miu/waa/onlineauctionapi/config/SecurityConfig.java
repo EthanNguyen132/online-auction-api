@@ -83,15 +83,12 @@ public class SecurityConfig {
                     .hasAuthority(RoleEnum.ADMIN.getAuthority())
                     .requestMatchers(ADMIN_URLs)
                     .hasAuthority(RoleEnum.ADMIN.getAuthority())
-                    .requestMatchers(
-                        new AntPathRequestMatcher(PRODUCTS_URLs, HttpMethod.GET.name()))
+                    .requestMatchers(PRODUCTS_URLs)
                     .hasAnyAuthority(
                         RoleEnum.CUSTOMER.getAuthority(),
                         RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
                     .requestMatchers(SELLER_PRODUCTS_URLs)
                     .hasAuthority(RoleEnum.SELLER.getAuthority())
-                    .requestMatchers("/test/**")
-                    .permitAll()
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(
