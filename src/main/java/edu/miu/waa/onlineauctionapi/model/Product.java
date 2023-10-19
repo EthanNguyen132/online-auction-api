@@ -17,9 +17,12 @@ public class Product {
   private double deposit;
   private double bidStartPrice;
   private LocalDate bidDueDate;
+  private LocalDate paymentDueDate;
   private String status; // draft/release
 
   @OneToMany(cascade = CascadeType.PERSIST)
   @JoinColumn(name = "product_id")
   List<ProductImage> images;
+
+  private String categories;
 }
