@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -29,13 +31,15 @@ public class WebConfig {
     return source;
   }
 
-  //	@Bean
-  //	public WebMvcConfigurer corsConfigurer() {
-  //		return new WebMvcConfigurer() {
-  //			@Override
-  //			public void addCorsMappings(CorsRegistry registry) {
-  //				registry.addMapping("/**").allowedOrigins("*").allowedMethods("*");
-  //			}
-  //		};
-  //	}
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String dir = System.getProperty("user.dir") + "/uploads/";
+        registry.addResourceHandler("/uploads/**")
+            .addResourceLocations("file:/" + dir);
+      }
+    };
+  }
 }
