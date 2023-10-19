@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    Page<Product> findByStatusOrderByIdAsc(String status, Pageable pageable);
+  Page<Product> findByStatusOrderByIdAsc(String status, Pageable pageable);
 
-    Page<Product> findByStatusAndNameContainsOrderByIdAsc(String status, String name, Pageable pageable);
+  Page<Product> findByStatusAndNameContainsOrderByIdAsc(
+      String status, String name, Pageable pageable);
 }

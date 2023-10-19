@@ -11,21 +11,21 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository productRepository;
+  private final ProductRepository productRepository;
 
-    @Override
-    public Product saveProduct(Product product) {
-        return productRepository.save(product);
-    }
+  @Override
+  public Product saveProduct(Product product) {
+    return productRepository.save(product);
+  }
 
-    @Override
-    public Page<Product> getActiveProducts(Pageable pageable) {
-        return productRepository.findByStatusOrderByIdAsc("release", pageable);
-    }
+  @Override
+  public Page<Product> getActiveProducts(Pageable pageable) {
+    return productRepository.findByStatusOrderByIdAsc("release", pageable);
+  }
 
-    @Override
-    public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable) {
-        return productRepository.findByStatusAndNameContainsOrderByIdAsc(
-                ProductStatus.RELEASE.getName(), name, pageable);
-    }
+  @Override
+  public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable) {
+    return productRepository.findByStatusAndNameContainsOrderByIdAsc(
+        ProductStatus.RELEASE.getName(), name, pageable);
+  }
 }

@@ -1,7 +1,6 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
-
 import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
 import edu.miu.waa.onlineauctionapi.dto.ProductSearchRequest;
 import edu.miu.waa.onlineauctionapi.model.Product;
@@ -24,12 +23,13 @@ public class ProductController {
 
   @PostMapping("/search")
   public ProductResponse searchProduct(@RequestBody ProductSearchRequest searchRequest) {
-    PageRequest pageRequest = PageRequest.of(
-            searchRequest.getPageNumber() - 1,
-            searchRequest.getPageSize());
+    PageRequest pageRequest =
+        PageRequest.of(searchRequest.getPageNumber() - 1, searchRequest.getPageSize());
 
-    Page<Product> list = productService.findActiveProductByStatusAndName(searchRequest.getName(), pageRequest);
-    ProductResponse res = ProductResponse.builder()
+    Page<Product> list =
+        productService.findActiveProductByStatusAndName(searchRequest.getName(), pageRequest);
+    ProductResponse res =
+        ProductResponse.builder()
             .success(true)
             .data(list.getContent())
             .totalPages(list.getTotalPages())

@@ -5,8 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
-    public Product saveProduct(Product product);
+  public Product saveProduct(Product product);
 
-    public Page<Product> getActiveProducts(Pageable pageable);
-    public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable);
+  public Page<Product> getActiveProducts(Pageable pageable);
+
+  public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable);
 }

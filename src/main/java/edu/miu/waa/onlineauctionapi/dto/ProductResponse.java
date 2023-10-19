@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ProductResponse {
-    private boolean success;
-    private Object data;
-    private int totalPages;
-    private long totalElements;
+  private boolean success;
+  private Object data;
+  private int totalPages;
+  private long totalElements;
 }

@@ -1,16 +1,16 @@
 package edu.miu.waa.onlineauctionapi.common;
 
 public enum ProductStatus {
-    DRAFT("draft"),
-    RELEASE("release");
+  DRAFT("draft"),
+  RELEASE("release");
 
-    private String name;
+  private String name;
 
-    ProductStatus(String name) {
-        this.name = name;
-    }
+  ProductStatus(String name) {
+    this.name = name;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 }
