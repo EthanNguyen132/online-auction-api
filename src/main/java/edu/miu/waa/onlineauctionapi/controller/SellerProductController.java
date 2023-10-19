@@ -1,11 +1,11 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
-import edu.miu.waa.onlineauctionapi.model.Image;
-import edu.miu.waa.onlineauctionapi.model.SellerProduct;
+import edu.miu.waa.onlineauctionapi.common.ProductStatus;
+import edu.miu.waa.onlineauctionapi.model.Product;
+import edu.miu.waa.onlineauctionapi.model.ProductImage;
 import edu.miu.waa.onlineauctionapi.repository.ImageRepository;
-import edu.miu.waa.onlineauctionapi.repository.SellerProductRepository;
-
+import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,12 +14,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,102 +31,102 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(Constants.SELLER_PRODUCTS_URL_PREFIX)
-@CrossOrigin(origins = "http://localhost:3000")
 public class SellerProductController {
 
-    @Autowired
-    private SellerProductRepository sellerProductRepository;
+  @Autowired private ProductRepository productRepository;
 
-    @GetMapping
-    public List<SellerProduct> getAllProducts() {
-        return sellerProductRepository.findAll();
+  @GetMapping
+  public List<Product> getAllProducts() {
+    return productRepository.findAll();
+  }
+
+  @PostMapping
+  public Product createProduct(@RequestBody Product product) {
+    return productRepository.save(product);
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<Product> updateProduct(
+      @PathVariable Long id, @RequestBody Product updatedProduct) {
+    return productRepository
+        .findById(id)
+        .map(
+            product -> {
+              product.setDescription(updatedProduct.getDescription());
+              product.setCategories(updatedProduct.getCategories());
+              product.setBidStartPrice(updatedProduct.getBidStartPrice());
+              product.setDeposit(updatedProduct.getDeposit());
+              product.setBidDueDate(updatedProduct.getBidDueDate());
+              product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
+              product.setStatus(ProductStatus.RELEASE.getName());
+              return new ResponseEntity<>(productRepository.save(product), HttpStatus.OK);
+            })
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    return productRepository
+        .findById(id)
+        .map(
+            product -> {
+              productRepository.delete(product);
+              return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+            })
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+  }
+
+  @Autowired ImageRepository imageRepository;
+
+  @PostMapping("/image")
+  public ProductImage uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
+    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+    String uploadDir = System.getProperty("user.dir") + "/frontend/public/images/upload/";
+
+    // Check if the directory exists, create if it doesn't
+    File dir = new File(uploadDir);
+    if (!dir.exists()) {
+      dir.mkdirs();
     }
 
-    @PostMapping
-    public SellerProduct createProduct(@RequestBody SellerProduct product) {
-        return sellerProductRepository.save(product);
+    // Save the file on the server
+    File upload = new File(uploadDir + fileName);
+    try (InputStream is = file.getInputStream()) {
+      Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SellerProduct> updateProduct(@PathVariable Long id,
-            @RequestBody SellerProduct updatedProduct) {
-        return sellerProductRepository.findById(id)
-                .map(product -> {
-                    product.setTitle(updatedProduct.getTitle());
-                    product.setDescription(updatedProduct.getDescription());
-                    product.setCategories(updatedProduct.getCategories());
-                    product.setStartingPrice(updatedProduct.getStartingPrice());
-                    product.setDeposit(updatedProduct.getDeposit());
-                    product.setBidDueDate(updatedProduct.getBidDueDate());
-                    product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
-                    product.setReleased(updatedProduct.isReleased());
-                    return new ResponseEntity<>(sellerProductRepository.save(product), HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    // Save the file info in the database
+    ProductImage image = new ProductImage();
+    image.setName(fileName);
+    //    image.setUrl("/images/upload/" + fileName); // It should be accessible via this URL
+    return imageRepository.save(image);
+  }
+
+  @PostMapping("/images")
+  public List<ProductImage> uploadImages(@RequestParam("files") MultipartFile[] files)
+      throws IOException {
+    List<ProductImage> images = new ArrayList<>();
+
+    for (MultipartFile file : files) {
+      String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+      String uploadDir = System.getProperty("user.dir") + "/images/upload/";
+
+      File dir = new File(uploadDir);
+      if (!dir.exists()) {
+        dir.mkdirs();
+      }
+
+      File upload = new File(uploadDir + fileName);
+      try (InputStream is = file.getInputStream()) {
+        Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
+      }
+
+      ProductImage image = new ProductImage();
+      image.setName(fileName);
+      //      image.setUrl("/images/upload/" + fileName);
+      images.add(imageRepository.save(image));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        return sellerProductRepository.findById(id)
-                .map(product -> {
-                    sellerProductRepository.delete(product);
-                    return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
-
-    @Autowired
-    ImageRepository imageRepository;
-
-    @PostMapping("/image")
-    public Image uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        String uploadDir = System.getProperty("user.dir") + "/frontend/public/images/upload/";
-
-        // Check if the directory exists, create if it doesn't
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        // Save the file on the server
-        File upload = new File(uploadDir + fileName);
-        try (InputStream is = file.getInputStream()) {
-            Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        // Save the file info in the database
-        Image image = new Image();
-        image.setName(fileName);
-        image.setUrl("/images/upload/" + fileName); // It should be accessible via this URL
-        return imageRepository.save(image);
-    }
-
-    @PostMapping("/images")
-    public List<Image> uploadImages(@RequestParam("files") MultipartFile[] files) throws IOException {
-        List<Image> images = new ArrayList<>();
-
-        for (MultipartFile file : files) {
-            String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-            String uploadDir = System.getProperty("user.dir") + "/images/upload/";
-
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            File upload = new File(uploadDir + fileName);
-            try (InputStream is = file.getInputStream()) {
-                Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            Image image = new Image();
-            image.setName(fileName);
-            image.setUrl("/images/upload/"  + fileName);
-            images.add(imageRepository.save(image));
-        }
-
-        return images;
-    }
-
+    return images;
+  }
 }
