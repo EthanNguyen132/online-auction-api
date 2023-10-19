@@ -1,50 +1,44 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
-import edu.miu.waa.onlineauctionapi.common.Constants;
-import edu.miu.waa.onlineauctionapi.dto.Product;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.miu.waa.onlineauctionapi.common.Constants;
+import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
+import edu.miu.waa.onlineauctionapi.dto.ProductSearchRequest;
+import edu.miu.waa.onlineauctionapi.model.Product;
+import edu.miu.waa.onlineauctionapi.service.ProductService;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping(Constants.PRODUCTS_URL_PREFIX)
+@RequiredArgsConstructor
 public class ProductController {
+  private final ProductService productService;
 
-        @GetMapping
-        public List<Product> getProducts() {
-                String[] images = { "/logo192.png" };
-                return Arrays.asList(
-                                Product.builder()
-                                                .id(1)
-                                                .name("iPhone 15 Pro Max")
-                                                .bidStartPrice(1000)
-                                                .deposit(100)
-                                                .images(images)
-                                                .build(),
-                                Product.builder()
-                                                .id(2)
-                                                .name("iPhone 14 Pro Max")
-                                                .bidStartPrice(900)
-                                                .deposit(90)
-                                                .images(images)
-                                                .build(),
-                                Product.builder()
-                                                .id(3)
-                                                .name("iPhone 13 Pro Max")
-                                                .bidStartPrice(800)
-                                                .deposit(80)
-                                                .images(images)
-                                                .build(),
-                                Product.builder()
-                                                .id(4)
-                                                .name("iPhone 12 Pro Max")
-                                                .bidStartPrice(700)
-                                                .deposit(70)
-                                                .images(images)
-                                                .build());
-        }
+  @PostMapping
+  public Product saveProduct(@RequestBody Product product) {
+    return productService.saveProduct(product);
+  }
+
+  @PostMapping("/search")
+  public ProductResponse searchProduct(@RequestBody ProductSearchRequest searchRequest) {
+    PageRequest pageRequest =
+        PageRequest.of(searchRequest.getPageNumber() - 1, searchRequest.getPageSize());
+
+    Page<Product> list =
+        productService.findActiveProductByStatusAndName(searchRequest.getName(), pageRequest);
+    ProductResponse res =
+        ProductResponse.builder()
+            .success(true)
+            .data(list.getContent())
+            .totalPages(list.getTotalPages())
+            .totalElements(list.getTotalElements())
+            .build();
+    return res;
+  }
 }

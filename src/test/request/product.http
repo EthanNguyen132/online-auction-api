@@ -1,0 +1,17 @@
+POST http://localhost:8080/products
+Content-Type: application/json
+
+{
+  "name": "product 1",
+  "description": "description 1",
+  "deposit": 100,
+  "bidStartPrice": 50,
+  "bidDueDate": "2023-10-26",
+  "images": [
+    {"name": "img.png"}
+  ],
+  "status": "release"
+}
+
+###
+GET http://localhost:8080/products?pageNumber=1&pageSize=3
