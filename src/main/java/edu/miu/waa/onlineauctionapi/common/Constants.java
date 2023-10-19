@@ -13,7 +13,9 @@ public class Constants {
   public static final String PRODUCTS_URLs = API_URL_v1_PREFIX + "/products/**";
   public static final String ADMIN_URLs = API_URL_v1_PREFIX + "/admin/**";
 
-  public static final String PRODUCTS_URL_PREFIX = API_URL_v1_PREFIX + "/products";
+  public static final String PRODUCTS_URL_PREFIX = API_URL_v1_PREFIX + "/products";  
+  public static final String SELLER_PRODUCTS_URL_PREFIX = API_URL_v1_PREFIX + "/seller/products";
+
   public static final String ADMIN_URL_PREFIX = API_URL_v1_PREFIX + "/admin";
 
   public static final String AUTHORIZATION = "Authorization";

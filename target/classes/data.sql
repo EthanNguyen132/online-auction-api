@@ -1,0 +1,12 @@
+INSERT IGNORE INTO `user` VALUES (1, 'admin','$2a$10$bg4htGxk4Lq7F8jABitWtedREpNFyGgOSFtaXNjr9D3.8YusaNQ26'); -- admin
+INSERT IGNORE INTO `user` VALUES (2, 'seller','$2a$10$FNY7zLAN8iXKtyzWvLkdW.Zt4JOABpOa7HQ7wPnzcdg/o2NS6i9Ha'); -- seller
+INSERT IGNORE INTO `user` VALUES (3, 'customer','$2a$12$Pi4hgQI2xLd942yc6S5f/uFY0dDCzQqiyjtxv3lMhDu9pYPP3PsHG'); -- customer
+
+
+INSERT IGNORE INTO `role` VALUES (1, 'ADMIN');
+INSERT IGNORE INTO `role` VALUES (2, 'SELLER');
+INSERT IGNORE INTO `role` VALUES (3, 'CUSTOMER');
+
+INSERT IGNORE INTO `user_role` VALUES (1, 1, 1);
+INSERT IGNORE INTO `user_role` VALUES (2, 2, 2);
+INSERT IGNORE INTO `user_role` VALUES (3, 3, 3);

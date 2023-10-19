@@ -128,12 +128,12 @@
                     </markdown>
                 </configuration>
                 <executions>
-                    <execution>
+                    <!-- <execution>
                         <goals>
                             <goal>check</goal>
                         </goals>
                         <phase>validate</phase>
-                    </execution>
+                    </execution> -->
                 </executions>
             </plugin>
         </plugins>

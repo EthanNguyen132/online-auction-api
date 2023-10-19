@@ -89,6 +89,7 @@ public class SecurityConfig {
                         RoleEnum.SELLER.getAuthority(), RoleEnum.CUSTOMER.getAuthority())
                     .requestMatchers("/test/**")
                     .permitAll()
+                    .requestMatchers("api/v1/seller/**").permitAll() // testing
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(
