@@ -1,14 +1,18 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
 import edu.miu.waa.onlineauctionapi.dto.ProductSearchRequest;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(Constants.PRODUCTS_URL_PREFIX)
