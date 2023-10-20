@@ -123,8 +123,7 @@ public class SellerProductController {
 
       ProductImage image = new ProductImage();
       image.setName(fileName);
-      //      image.setUrl("/images/upload/" + fileName);
-      images.add(imageRepository.save(image));
+      images.add(image);
     }
 
     return images;
