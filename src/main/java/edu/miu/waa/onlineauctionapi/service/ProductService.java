@@ -10,4 +10,6 @@ public interface ProductService {
   public Page<Product> getActiveProducts(Pageable pageable);
 
   public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable);
+
+  public Product getProduct(long id);
 }

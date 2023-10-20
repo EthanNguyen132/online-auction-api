@@ -12,4 +12,6 @@ public class ProductResponse {
   private Object data;
   private int totalPages;
   private long totalElements;
+  private int totalBids;
+  private double currentBid;
 }

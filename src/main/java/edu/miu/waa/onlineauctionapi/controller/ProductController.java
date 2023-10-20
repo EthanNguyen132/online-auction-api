@@ -4,20 +4,19 @@ import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
 import edu.miu.waa.onlineauctionapi.dto.ProductSearchRequest;
 import edu.miu.waa.onlineauctionapi.model.Product;
+import edu.miu.waa.onlineauctionapi.service.BidService;
 import edu.miu.waa.onlineauctionapi.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(Constants.PRODUCTS_URL_PREFIX)
 @RequiredArgsConstructor
 public class ProductController {
   private final ProductService productService;
+  private final BidService bidService;
 
   @PostMapping("/search")
   public ProductResponse searchProduct(@RequestBody ProductSearchRequest searchRequest) {
@@ -33,6 +32,20 @@ public class ProductController {
             .totalPages(list.getTotalPages())
             .totalElements(list.getTotalElements())
             .build();
+    return res;
+  }
+
+  @GetMapping("/{id}")
+  public ProductResponse getProductDetails(@PathVariable long id) {
+    Product product = productService.getProduct(id);
+
+    ProductResponse res =
+            ProductResponse.builder()
+                    .success(true)
+                    .data(product)
+                    .totalBids(bidService.countTotalBidsByProductId(id))
+                    .currentBid(70)
+                    .build();
     return res;
   }
 }

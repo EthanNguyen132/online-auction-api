@@ -28,4 +28,9 @@ public class ProductServiceImpl implements ProductService {
     return productRepository.findByStatusAndNameContainsOrderByIdAsc(
         ProductStatus.RELEASE.getName(), name, pageable);
   }
+
+  @Override
+  public Product getProduct(long id) {
+    return productRepository.findById(id).orElse(null);
+  }
 }
