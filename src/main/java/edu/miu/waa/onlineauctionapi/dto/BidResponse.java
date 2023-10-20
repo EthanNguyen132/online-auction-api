@@ -8,8 +8,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class BidResponse {
-    private boolean success;
-    private Object data;
-    private String message;
-    private boolean requiredDeposit = false;
+  private boolean success;
+  private Object data;
+  private String message;
+  private boolean requiredDeposit = false;
 }

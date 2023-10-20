@@ -64,7 +64,8 @@ public class SellerProductController {
               product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
               product.setStatus(updatedProduct.getStatus());
               product.setImages(updatedProduct.getImages());
-              product.setShippingInformation(updatedProduct.getShippingInformation());              product.setShippingInformation(updatedProduct.getShippingInformation());
+              product.setShippingInformation(updatedProduct.getShippingInformation());
+              product.setShippingInformation(updatedProduct.getShippingInformation());
               product.setConditionOfSale(updatedProduct.getConditionOfSale());
               return new ResponseEntity<>(productService.saveProduct(product), HttpStatus.OK);
             })

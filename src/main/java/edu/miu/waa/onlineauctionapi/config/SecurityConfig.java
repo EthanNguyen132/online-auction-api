@@ -2,7 +2,6 @@ package edu.miu.waa.onlineauctionapi.config;
 
 import static edu.miu.waa.onlineauctionapi.common.Constants.*;
 
-import edu.miu.waa.onlineauctionapi.security.RoleEnum;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -32,7 +30,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
@@ -73,26 +70,28 @@ public class SecurityConfig {
                     (request, response, ex) -> {
                       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
                     }))
-        .authorizeHttpRequests(
-            req -> req.anyRequest().permitAll())
-//                req.requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.POST.name()))
-//                    .permitAll()
-//                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name()))
-//                    .permitAll()
-//                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs).permitAll()
-//
-//                    .requestMatchers(SIGNUP_ADMIN_URL)
-//                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
-//                    .requestMatchers(ADMIN_URLs)
-//                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
-//                    .requestMatchers(PRODUCTS_URLs)
-//                    .hasAnyAuthority(
-//                        RoleEnum.CUSTOMER.getAuthority(),
-//                        RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
-//                    .requestMatchers(SELLER_PRODUCTS_URLs)
-//                    .hasAuthority(RoleEnum.SELLER.getAuthority())
-//                    .anyRequest()
-//                    .authenticated())
+        .authorizeHttpRequests(req -> req.anyRequest().permitAll())
+        //                req.requestMatchers(new AntPathRequestMatcher(TOKEN_URL,
+        // HttpMethod.POST.name()))
+        //                    .permitAll()
+        //                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL,
+        // HttpMethod.POST.name()))
+        //                    .permitAll()
+        //                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs).permitAll()
+        //
+        //                    .requestMatchers(SIGNUP_ADMIN_URL)
+        //                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+        //                    .requestMatchers(ADMIN_URLs)
+        //                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+        //                    .requestMatchers(PRODUCTS_URLs)
+        //                    .hasAnyAuthority(
+        //                        RoleEnum.CUSTOMER.getAuthority(),
+        //                        RoleEnum.SELLER.getAuthority()) // allow seller to see other
+        // people products
+        //                    .requestMatchers(SELLER_PRODUCTS_URLs)
+        //                    .hasAuthority(RoleEnum.SELLER.getAuthority())
+        //                    .anyRequest()
+        //                    .authenticated())
         .oauth2ResourceServer(
             oauth2ResourceServer ->
                 oauth2ResourceServer.jwt(

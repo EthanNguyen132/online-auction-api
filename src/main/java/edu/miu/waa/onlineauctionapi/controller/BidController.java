@@ -16,38 +16,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping(Constants.BIDS_URL_PREFIX)
 public class BidController {
-    private final BidService bidService;
-    private final UserService userService;
+  private final BidService bidService;
+  private final UserService userService;
 
-    @PostMapping
-    public BidResponse addBid(@RequestBody Bid bid) {
-        String email = bid.getUser().getEmail();
+  @PostMapping
+  public BidResponse addBid(@RequestBody Bid bid) {
+    String email = bid.getUser().getEmail();
 
-        // check valid user
-        User user = userService.findUser(email);
-        if (user == null) {
-            return BidResponse.builder()
-                    .success(false)
-                    .message("Invalid user")
-                    .build();
-        }
-        bid.setUser(user);
-
-        // check if deposit
-        boolean hasDeposit = bidService.hasDeposit(user.getId(), bid.getProduct().getId());
-        if (!hasDeposit) {
-            return BidResponse.builder()
-                    .success(false)
-                    .message("Required deposit")
-                    .requiredDeposit(true)
-                    .build();
-        }
-        // save bid
-        bidService.addBid(bid);
-        return BidResponse.builder()
-                .success(true)
-                .build();
+    // check valid user
+    User user = userService.findUser(email);
+    if (user == null) {
+      return BidResponse.builder().success(false).message("Invalid user").build();
     }
+    bid.setUser(user);
 
-
+    // check if deposit
+    boolean hasDeposit = bidService.hasDeposit(user.getId(), bid.getProduct().getId());
+    if (!hasDeposit) {
+      return BidResponse.builder()
+          .success(false)
+          .message("Required deposit")
+          .requiredDeposit(true)
+          .build();
+    }
+    // save bid
+    bidService.addBid(bid);
+    return BidResponse.builder().success(true).build();
+  }
 }

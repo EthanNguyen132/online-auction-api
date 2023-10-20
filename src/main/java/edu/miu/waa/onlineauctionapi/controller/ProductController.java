@@ -42,12 +42,12 @@ public class ProductController {
     Bid currentBid = bidService.getCurrentBidByProductId(id);
 
     ProductResponse res =
-            ProductResponse.builder()
-                    .success(true)
-                    .data(product)
-                    .totalBids(bidService.countTotalBidsByProductId(id))
-                    .currentBid(currentBid==null ? 0 : currentBid.getBidPrice())
-                    .build();
+        ProductResponse.builder()
+            .success(true)
+            .data(product)
+            .totalBids(bidService.countTotalBidsByProductId(id))
+            .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
+            .build();
     return res;
   }
 }
