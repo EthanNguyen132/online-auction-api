@@ -13,8 +13,8 @@ public class Billing {
     private long id;
 
     private double amount;
-    private String type; // deposit/withdraw
-    private String details;
+    private String type; // debit/credit
+    private String details; // deposit/refund
     private double balance;
     private LocalDate transactionDate;
 
