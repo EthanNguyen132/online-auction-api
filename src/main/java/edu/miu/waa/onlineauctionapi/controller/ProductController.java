@@ -1,6 +1,8 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
+import edu.miu.waa.onlineauctionapi.dto.BidDto;
+import edu.miu.waa.onlineauctionapi.dto.BidResponse;
 import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
 import edu.miu.waa.onlineauctionapi.dto.ProductSearchRequest;
 import edu.miu.waa.onlineauctionapi.model.Bid;
@@ -36,18 +38,38 @@ public class ProductController {
     return res;
   }
 
-  @GetMapping("/{id}")
-  public ProductResponse getProductDetails(@PathVariable long id) {
-    Product product = productService.getProduct(id);
-    Bid currentBid = bidService.getCurrentBidByProductId(id);
+  @GetMapping("/{productId}")
+  public ProductResponse getProductDetails(@PathVariable long productId) {
+    Product product = productService.getProduct(productId);
+    Bid currentBid = bidService.getCurrentBidByProductId(productId);
 
     ProductResponse res =
         ProductResponse.builder()
             .success(true)
             .data(product)
-            .totalBids(bidService.countTotalBidsByProductId(id))
+            .totalBids(bidService.countTotalBidsByProductId(productId))
             .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
             .build();
+    return res;
+  }
+
+  @GetMapping("/{productId}/bid")
+  public BidResponse getCurrentBidByProductId(@PathVariable long productId) {
+    Product product = productService.getProduct(productId);
+    Bid currentBid = bidService.getCurrentBidByProductId(productId);
+
+    BidDto bidDto =
+            BidDto.builder()
+                    .totalBids(bidService.countTotalBidsByProductId(productId))
+                    .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
+                    .bidStartPrice(product.getBidStartPrice())
+                    .deposit(product.getDeposit())
+                    .build();
+    BidResponse res =
+            BidResponse.builder()
+                    .success(true)
+                    .data(bidDto)
+                    .build();
     return res;
   }
 }

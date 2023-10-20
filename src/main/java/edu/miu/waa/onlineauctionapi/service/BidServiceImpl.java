@@ -23,7 +23,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public boolean hasDeposit(long userId, long productId) {
-    return bidRepository.existsByUserIdAndProductIdAndDepositNotNull(userId, productId);
+    return bidRepository.existsByUserIdAndProductIdAndDepositGreaterThan(userId, productId, 0);
   }
 
   @Override

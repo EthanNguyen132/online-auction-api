@@ -2,6 +2,8 @@ package edu.miu.waa.onlineauctionapi.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.Date;
+
 import lombok.Data;
 
 @Entity
@@ -12,9 +14,9 @@ public class Bid {
   private long id;
 
   private double deposit;
-  private LocalDate depositDate;
+  private Date depositDate;
 
-  private LocalDate bidDate;
+  private Date bidDate;
   private double bidPrice;
   private boolean winner;
 
