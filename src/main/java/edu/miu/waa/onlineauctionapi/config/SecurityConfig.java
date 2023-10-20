@@ -74,25 +74,25 @@ public class SecurityConfig {
                       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
                     }))
         .authorizeHttpRequests(
-            req ->
-                req.requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.POST.name()))
-                    .permitAll()
-                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name()))
-                    .permitAll()
-                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs).permitAll()
-                    
-                    .requestMatchers(SIGNUP_ADMIN_URL)
-                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
-                    .requestMatchers(ADMIN_URLs)
-                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
-                    .requestMatchers(PRODUCTS_URLs)
-                    .hasAnyAuthority(
-                        RoleEnum.CUSTOMER.getAuthority(),
-                        RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
-                    .requestMatchers(SELLER_PRODUCTS_URLs) 
-                    .hasAuthority(RoleEnum.SELLER.getAuthority())
-                    .anyRequest()
-                    .authenticated())
+            req -> req.anyRequest().permitAll())
+//                req.requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.POST.name()))
+//                    .permitAll()
+//                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name()))
+//                    .permitAll()
+//                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs).permitAll()
+//
+//                    .requestMatchers(SIGNUP_ADMIN_URL)
+//                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+//                    .requestMatchers(ADMIN_URLs)
+//                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+//                    .requestMatchers(PRODUCTS_URLs)
+//                    .hasAnyAuthority(
+//                        RoleEnum.CUSTOMER.getAuthority(),
+//                        RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
+//                    .requestMatchers(SELLER_PRODUCTS_URLs)
+//                    .hasAuthority(RoleEnum.SELLER.getAuthority())
+//                    .anyRequest()
+//                    .authenticated())
         .oauth2ResourceServer(
             oauth2ResourceServer ->
                 oauth2ResourceServer.jwt(

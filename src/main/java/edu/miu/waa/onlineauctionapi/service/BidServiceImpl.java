@@ -17,6 +17,18 @@ public class BidServiceImpl implements BidService {
 
     @Override
     public int countTotalBidsByProductId(long id) {
-        return bidRepository.countByProductId(id);
+
+        return bidRepository.countByProductIdAndBidPriceGreaterThan(id, 0);
+    }
+
+    @Override
+    public boolean hasDeposit(long userId, long productId) {
+        return bidRepository.existsByUserIdAndProductIdAndDepositNotNull(userId, productId);
+    }
+
+    @Override
+    public Bid getCurrentBidByProductId(long productId) {
+        Bid bid = bidRepository.findTop1ByProductIdOrderByBidPriceDesc(productId);
+        return bid;
     }
 }

@@ -6,5 +6,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BidRepository extends JpaRepository<Bid, Long> {
-    public int countByProductId(long id);
+    public int countByProductIdAndBidPriceGreaterThan(long id, double price);
+
+    boolean existsByUserIdAndProductIdAndDepositNotNull(long userId, long productId);
+
+    Bid findTop1ByProductIdOrderByBidPriceDesc(long productId);
 }

@@ -3,6 +3,7 @@ package edu.miu.waa.onlineauctionapi.controller;
 import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
 import edu.miu.waa.onlineauctionapi.dto.ProductSearchRequest;
+import edu.miu.waa.onlineauctionapi.model.Bid;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.service.BidService;
 import edu.miu.waa.onlineauctionapi.service.ProductService;
@@ -38,13 +39,14 @@ public class ProductController {
   @GetMapping("/{id}")
   public ProductResponse getProductDetails(@PathVariable long id) {
     Product product = productService.getProduct(id);
+    Bid currentBid = bidService.getCurrentBidByProductId(id);
 
     ProductResponse res =
             ProductResponse.builder()
                     .success(true)
                     .data(product)
                     .totalBids(bidService.countTotalBidsByProductId(id))
-                    .currentBid(70)
+                    .currentBid(currentBid==null ? 0 : currentBid.getBidPrice())
                     .build();
     return res;
   }

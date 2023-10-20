@@ -80,4 +80,5 @@ public class User implements UserDetails {
     return true;
   }
 
+  private double currentBalance;
 }
