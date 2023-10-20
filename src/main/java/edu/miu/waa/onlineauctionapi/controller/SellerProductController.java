@@ -4,7 +4,6 @@ import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.model.ProductImage;
-import edu.miu.waa.onlineauctionapi.repository.ImageRepository;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import java.io.File;
 import java.io.IOException;
@@ -59,9 +58,20 @@ public class SellerProductController {
               product.setBidDueDate(updatedProduct.getBidDueDate());
               product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
               product.setStatus(ProductStatus.RELEASE.getName());
+              product.setImages(updatedProduct.getImages());
               return new ResponseEntity<>(productRepository.save(product), HttpStatus.OK);
             })
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+    var result =
+        productRepository
+            .findById(id)
+            .map(product -> new ResponseEntity<>(productRepository.save(product), HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return result;
   }
 
   @DeleteMapping("/{id}")
@@ -74,32 +84,6 @@ public class SellerProductController {
               return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
             })
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-  }
-
-  @Autowired ImageRepository imageRepository;
-
-  @PostMapping("/image")
-  public ProductImage uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
-    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-    String uploadDir = System.getProperty("user.dir") + "/frontend/public/images/upload/";
-
-    // Check if the directory exists, create if it doesn't
-    File dir = new File(uploadDir);
-    if (!dir.exists()) {
-      dir.mkdirs();
-    }
-
-    // Save the file on the server
-    File upload = new File(uploadDir + fileName);
-    try (InputStream is = file.getInputStream()) {
-      Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    // Save the file info in the database
-    ProductImage image = new ProductImage();
-    image.setName(fileName);
-    //    image.setUrl("/images/upload/" + fileName); // It should be accessible via this URL
-    return imageRepository.save(image);
   }
 
   @PostMapping("/images")
