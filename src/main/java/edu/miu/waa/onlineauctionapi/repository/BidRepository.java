@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface BidRepository extends JpaRepository<Bid, Long> {
   public int countByProductIdAndBidPriceGreaterThan(long id, double price);
 
-  boolean existsByUserIdAndProductIdAndDepositNotNull(long userId, long productId);
+  boolean existsByUserIdAndProductIdAndDepositGreaterThan(long userId, long productId, double deposit);
 
   Bid findTop1ByProductIdOrderByBidPriceDesc(long productId);
 }
