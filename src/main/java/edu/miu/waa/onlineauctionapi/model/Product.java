@@ -20,7 +20,7 @@ public class Product {
   private LocalDate paymentDueDate;
   private String status; // draft/release
 
-  @OneToMany(cascade = CascadeType.PERSIST)
+  @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "product_id")
   List<ProductImage> images;
 

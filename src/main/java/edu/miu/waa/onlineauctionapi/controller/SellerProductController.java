@@ -4,7 +4,6 @@ import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.model.ProductImage;
-import edu.miu.waa.onlineauctionapi.repository.ImageRepository;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +13,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,9 +61,20 @@ public class SellerProductController {
               product.setBidDueDate(updatedProduct.getBidDueDate());
               product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
               product.setStatus(ProductStatus.RELEASE.getName());
+              product.setImages(updatedProduct.getImages());
               return new ResponseEntity<>(productRepository.save(product), HttpStatus.OK);
             })
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+    var result =
+        productRepository
+            .findById(id)
+            .map(product -> new ResponseEntity<>(productRepository.save(product), HttpStatus.OK))
+            .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    return result;
   }
 
   @DeleteMapping("/{id}")
@@ -76,32 +89,6 @@ public class SellerProductController {
         .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
   }
 
-  @Autowired ImageRepository imageRepository;
-
-  @PostMapping("/image")
-  public ProductImage uploadImage(@RequestParam("file") MultipartFile file) throws Exception {
-    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-    String uploadDir = System.getProperty("user.dir") + "/frontend/public/images/upload/";
-
-    // Check if the directory exists, create if it doesn't
-    File dir = new File(uploadDir);
-    if (!dir.exists()) {
-      dir.mkdirs();
-    }
-
-    // Save the file on the server
-    File upload = new File(uploadDir + fileName);
-    try (InputStream is = file.getInputStream()) {
-      Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    // Save the file info in the database
-    ProductImage image = new ProductImage();
-    image.setName(fileName);
-    //    image.setUrl("/images/upload/" + fileName); // It should be accessible via this URL
-    return imageRepository.save(image);
-  }
-
   @PostMapping("/images")
   public List<ProductImage> uploadImages(@RequestParam("files") MultipartFile[] files)
       throws IOException {
@@ -109,24 +96,37 @@ public class SellerProductController {
 
     for (MultipartFile file : files) {
       String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-      String uploadDir = System.getProperty("user.dir") + "/images/upload/";
-
-      File dir = new File(uploadDir);
+      
+      File dir = new File(FILE_PATH_ROOT);
       if (!dir.exists()) {
         dir.mkdirs();
       }
 
-      File upload = new File(uploadDir + fileName);
+      File upload = new File(FILE_PATH_ROOT + fileName);
       try (InputStream is = file.getInputStream()) {
         Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
       }
 
       ProductImage image = new ProductImage();
       image.setName(fileName);
-      //      image.setUrl("/images/upload/" + fileName);
-      images.add(imageRepository.save(image));
+      images.add(image);
     }
 
     return images;
   }
+
+    //root path for image files
+    private String FILE_PATH_ROOT = System.getProperty("user.dir") + "/images/upload/";
+
+
+    @GetMapping("/statics/images/{filename}")
+    public ResponseEntity<byte[]> getImage(@PathVariable("filename") String filename) {
+        byte[] image = new byte[0];
+        try {
+            image = FileUtils.readFileToByteArray(new File(FILE_PATH_ROOT+filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
+    }
 }
