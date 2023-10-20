@@ -25,4 +25,6 @@ public class Product {
   List<ProductImage> images;
 
   private String categories;
+  private String conditionOfSale;
+  private String shippingInformation;
 }
