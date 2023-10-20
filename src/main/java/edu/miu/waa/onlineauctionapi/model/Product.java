@@ -2,6 +2,7 @@ package edu.miu.waa.onlineauctionapi.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -27,4 +28,7 @@ public class Product {
   private List<String> categories;
   private String conditionOfSale;
   private String shippingInformation;
+
+  private String owner;
+  private Date created;
 }

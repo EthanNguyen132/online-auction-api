@@ -40,12 +40,12 @@ public class ProductController {
     Product product = productService.getProduct(id);
 
     ProductResponse res =
-            ProductResponse.builder()
-                    .success(true)
-                    .data(product)
-                    .totalBids(bidService.countTotalBidsByProductId(id))
-                    .currentBid(70)
-                    .build();
+        ProductResponse.builder()
+            .success(true)
+            .data(product)
+            .totalBids(bidService.countTotalBidsByProductId(id))
+            .currentBid(70)
+            .build();
     return res;
   }
 }

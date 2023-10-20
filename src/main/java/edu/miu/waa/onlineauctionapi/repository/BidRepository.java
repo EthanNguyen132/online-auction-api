@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BidRepository extends JpaRepository<Bid, Long> {
-    public int countByProductId(long id);
+  public int countByProductId(long id);
 }

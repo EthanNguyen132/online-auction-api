@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping(Constants.BIDS_URL_PREFIX)
 public class BidController {
-    private final BidService bidService;
+  private final BidService bidService;
 
-    @PostMapping
-    public Bid addBid(@RequestBody Bid bid) {
-        return bidService.addBid(bid);
-    }
-
+  @PostMapping
+  public Bid addBid(@RequestBody Bid bid) {
+    return bidService.addBid(bid);
+  }
 }
