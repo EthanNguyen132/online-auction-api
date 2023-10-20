@@ -13,8 +13,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -93,14 +96,13 @@ public class SellerProductController {
 
     for (MultipartFile file : files) {
       String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-      String uploadDir = System.getProperty("user.dir") + "/images/upload/";
-
-      File dir = new File(uploadDir);
+      
+      File dir = new File(FILE_PATH_ROOT);
       if (!dir.exists()) {
         dir.mkdirs();
       }
 
-      File upload = new File(uploadDir + fileName);
+      File upload = new File(FILE_PATH_ROOT + fileName);
       try (InputStream is = file.getInputStream()) {
         Files.copy(is, upload.toPath(), StandardCopyOption.REPLACE_EXISTING);
       }
@@ -112,4 +114,19 @@ public class SellerProductController {
 
     return images;
   }
+
+    //root path for image files
+    private String FILE_PATH_ROOT = System.getProperty("user.dir") + "/images/upload/";
+
+
+    @GetMapping("/statics/images/{filename}")
+    public ResponseEntity<byte[]> getImage(@PathVariable("filename") String filename) {
+        byte[] image = new byte[0];
+        try {
+            image = FileUtils.readFileToByteArray(new File(FILE_PATH_ROOT+filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(image);
+    }
 }

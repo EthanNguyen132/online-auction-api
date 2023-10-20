@@ -79,6 +79,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name()))
                     .permitAll()
+                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs).permitAll()
+                    
                     .requestMatchers(SIGNUP_ADMIN_URL)
                     .hasAuthority(RoleEnum.ADMIN.getAuthority())
                     .requestMatchers(ADMIN_URLs)
@@ -87,7 +89,7 @@ public class SecurityConfig {
                     .hasAnyAuthority(
                         RoleEnum.CUSTOMER.getAuthority(),
                         RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
-                    .requestMatchers(SELLER_PRODUCTS_URLs)
+                    .requestMatchers(SELLER_PRODUCTS_URLs) 
                     .hasAuthority(RoleEnum.SELLER.getAuthority())
                     .anyRequest()
                     .authenticated())
