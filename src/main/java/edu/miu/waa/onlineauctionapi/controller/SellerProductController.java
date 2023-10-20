@@ -60,7 +60,7 @@ public class SellerProductController {
               product.setDeposit(updatedProduct.getDeposit());
               product.setBidDueDate(updatedProduct.getBidDueDate());
               product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
-              product.setStatus(ProductStatus.RELEASE.getName());
+              product.setStatus(updatedProduct.getStatus());
               product.setImages(updatedProduct.getImages());
               return new ResponseEntity<>(productRepository.save(product), HttpStatus.OK);
             })

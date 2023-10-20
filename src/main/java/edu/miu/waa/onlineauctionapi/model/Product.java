@@ -24,7 +24,7 @@ public class Product {
   @JoinColumn(name = "product_id")
   List<ProductImage> images;
 
-  private String categories;
+  private List<String> categories;
   private String conditionOfSale;
   private String shippingInformation;
 }
