@@ -43,30 +43,27 @@ public class ProductController {
   public ProductResponse getProductDetails(@PathVariable long productId) {
     Product product = productService.getProduct(productId);
 
-    ProductResponse res =
-        ProductResponse.builder()
-            .success(true)
-            .data(product)
-            .build();
+    ProductResponse res = ProductResponse.builder().success(true).data(product).build();
     return res;
   }
 
   @GetMapping("/{productId}/bid")
-  public BidResponse getCurrentBidByProductId(@PathVariable long productId, Authentication authentication) {
+  public BidResponse getCurrentBidByProductId(
+      @PathVariable long productId, Authentication authentication) {
     var userEmail =
-            ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
+        ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
 
     Product product = productService.getProduct(productId);
     Bid currentBid = bidService.getCurrentBidByProductId(productId);
 
     BidDto bidDto =
         BidDto.builder()
-                .totalBids(bidService.countTotalBidsByProductId(productId))
-                .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
-                .bidStartPrice(product.getBidStartPrice())
-                .deposit(product.getDeposit())
-                .productOwner(userEmail.equals(product.getOwner()))
-                .build();
+            .totalBids(bidService.countTotalBidsByProductId(productId))
+            .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
+            .bidStartPrice(product.getBidStartPrice())
+            .deposit(product.getDeposit())
+            .productOwner(userEmail.equals(product.getOwner()))
+            .build();
     BidResponse res = BidResponse.builder().success(true).data(bidDto).build();
     return res;
   }

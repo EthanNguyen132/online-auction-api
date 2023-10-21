@@ -19,7 +19,7 @@ public class Product {
   private double bidStartPrice;
   private LocalDate bidDueDate;
   private LocalDate paymentDueDate;
-  private String status; // draft/release
+  private String status; // draft/release/SOLD/EXPIRED
 
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "product_id")
