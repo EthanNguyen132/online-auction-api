@@ -1,21 +1,36 @@
 package edu.miu.waa.onlineauctionapi.config;
 
-import static edu.miu.waa.onlineauctionapi.common.Constants.*;
+import static edu.miu.waa.onlineauctionapi.common.Constants.ADMIN_URLs;
+import static edu.miu.waa.onlineauctionapi.common.Constants.AUTHORITY_PREFIX;
+import static edu.miu.waa.onlineauctionapi.common.Constants.PRODUCTS_URLs;
+import static edu.miu.waa.onlineauctionapi.common.Constants.ROLE_CLAIM;
+import static edu.miu.waa.onlineauctionapi.common.Constants.SELLER_PRODUCTS_STATICS_URLs;
+import static edu.miu.waa.onlineauctionapi.common.Constants.SELLER_PRODUCTS_URLs;
+import static edu.miu.waa.onlineauctionapi.common.Constants.SIGNUP_ADMIN_URL;
+import static edu.miu.waa.onlineauctionapi.common.Constants.SIGNUP_URL;
+import static edu.miu.waa.onlineauctionapi.common.Constants.TOKEN_URL;
 
-import jakarta.servlet.http.HttpServletResponse;
+import edu.miu.waa.onlineauctionapi.security.RoleEnum;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -29,11 +44,14 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -50,7 +68,8 @@ public class SecurityConfig {
   @Value("${app.security.jwt.private-key-passphrase}")
   private String privateKeyPassphrase;
 
-  private CorsConfigurationSource corsConfigurationSource;
+  private final CorsConfigurationSource corsConfigurationSource;
+  private final AuthenticationEntryPoint authenticationEntryPoint;
 
   @Bean
   public AuthenticationManager authenticationManager(
@@ -64,38 +83,41 @@ public class SecurityConfig {
         .formLogin(formLogin -> formLogin.disable())
         .csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource))
-        .exceptionHandling(
-            exceptionHandling ->
-                exceptionHandling.authenticationEntryPoint(
-                    (request, response, ex) -> {
-                      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());
-                    }))
-        .authorizeHttpRequests(req -> req.anyRequest().permitAll())
-        //                req.requestMatchers(new AntPathRequestMatcher(TOKEN_URL,
-        // HttpMethod.POST.name()))
-        //                    .permitAll()
-        //                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL,
-        // HttpMethod.POST.name()))
-        //                    .permitAll()
-        //                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs).permitAll()
-        //
-        //                    .requestMatchers(SIGNUP_ADMIN_URL)
-        //                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
-        //                    .requestMatchers(ADMIN_URLs)
-        //                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
-        //                    .requestMatchers(PRODUCTS_URLs)
-        //                    .hasAnyAuthority(
-        //                        RoleEnum.CUSTOMER.getAuthority(),
-        //                        RoleEnum.SELLER.getAuthority()) // allow seller to see other
-        // people products
-        //                    .requestMatchers(SELLER_PRODUCTS_URLs)
-        //                    .hasAuthority(RoleEnum.SELLER.getAuthority())
-        //                    .anyRequest()
-        //                    .authenticated())
+        //        .exceptionHandling(
+        //            exceptionHandling ->
+        //                exceptionHandling.authenticationEntryPoint(
+        //                    (request, response, ex) -> {
+        //                      response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+        // ex.getMessage());
+        //                    }))
+        .authorizeHttpRequests(
+            req ->
+                //        req.anyRequest().permitAll())
+                req.requestMatchers(new AntPathRequestMatcher(TOKEN_URL, HttpMethod.POST.name()))
+                    .permitAll()
+                    .requestMatchers(new AntPathRequestMatcher(SIGNUP_URL, HttpMethod.POST.name()))
+                    .permitAll()
+                    .requestMatchers(SELLER_PRODUCTS_STATICS_URLs)
+                    .permitAll()
+                    .requestMatchers(SIGNUP_ADMIN_URL)
+                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+                    .requestMatchers(ADMIN_URLs)
+                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
+                    .requestMatchers(PRODUCTS_URLs)
+                    .hasAnyAuthority(
+                        RoleEnum.CUSTOMER.getAuthority(),
+                        RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
+                    .requestMatchers(SELLER_PRODUCTS_URLs)
+                    .hasAuthority(RoleEnum.SELLER.getAuthority())
+                    .anyRequest()
+                    .authenticated())
         .oauth2ResourceServer(
             oauth2ResourceServer ->
                 oauth2ResourceServer.jwt(
-                    jwt -> jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter())))
+                    jwt ->
+                        jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter())
+                            .and()
+                            .authenticationEntryPoint(authenticationEntryPoint)))
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     return http.build();
   }
