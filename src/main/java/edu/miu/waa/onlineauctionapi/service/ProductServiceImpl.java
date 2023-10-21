@@ -3,6 +3,11 @@ package edu.miu.waa.onlineauctionapi.service;
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +26,21 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public Page<Product> getActiveProducts(Pageable pageable) {
-    return productRepository.findByStatusOrderByIdAsc("release", pageable);
+  public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable) {
+    return productRepository.findByStatusAndNameContainsAndBidDueDateAfterOrderByIdAsc(
+        ProductStatus.RELEASE.getName(), name, addDays(-1), pageable);
   }
 
-  @Override
-  public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable) {
-    return productRepository.findByStatusAndNameContainsOrderByIdAsc(
-        ProductStatus.RELEASE.getName(), name, pageable);
+  private static LocalDate addDays(int days)
+  {
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(new Date());
+    cal.add(Calendar.DATE, days); //minus number would decrement the days
+
+    Date input = cal.getTime();
+    LocalDate date = input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    System.out.println("LocalDate" + date);
+    return date;
   }
 
   @Override
