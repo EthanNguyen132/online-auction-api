@@ -12,4 +12,5 @@ public class BidDto {
   private double currentBid;
   private double bidStartPrice;
   private double deposit;
+  private boolean productOwner;
 }

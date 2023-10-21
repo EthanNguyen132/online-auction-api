@@ -12,6 +12,7 @@ import edu.miu.waa.onlineauctionapi.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -41,30 +42,31 @@ public class ProductController {
   @GetMapping("/{productId}")
   public ProductResponse getProductDetails(@PathVariable long productId) {
     Product product = productService.getProduct(productId);
-    Bid currentBid = bidService.getCurrentBidByProductId(productId);
 
     ProductResponse res =
         ProductResponse.builder()
             .success(true)
             .data(product)
-            .totalBids(bidService.countTotalBidsByProductId(productId))
-            .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
             .build();
     return res;
   }
 
   @GetMapping("/{productId}/bid")
-  public BidResponse getCurrentBidByProductId(@PathVariable long productId) {
+  public BidResponse getCurrentBidByProductId(@PathVariable long productId, Authentication authentication) {
+    var userEmail =
+            ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
+
     Product product = productService.getProduct(productId);
     Bid currentBid = bidService.getCurrentBidByProductId(productId);
 
     BidDto bidDto =
         BidDto.builder()
-            .totalBids(bidService.countTotalBidsByProductId(productId))
-            .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
-            .bidStartPrice(product.getBidStartPrice())
-            .deposit(product.getDeposit())
-            .build();
+                .totalBids(bidService.countTotalBidsByProductId(productId))
+                .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
+                .bidStartPrice(product.getBidStartPrice())
+                .deposit(product.getDeposit())
+                .productOwner(userEmail.equals(product.getOwner()))
+                .build();
     BidResponse res = BidResponse.builder().success(true).data(bidDto).build();
     return res;
   }
