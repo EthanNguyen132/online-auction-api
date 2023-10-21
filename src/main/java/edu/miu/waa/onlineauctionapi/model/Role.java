@@ -11,6 +11,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Objects;
+
 import org.hibernate.annotations.NaturalId;
 
 @Getter // do not use @Data for entity
@@ -35,5 +38,19 @@ public class Role {
   @Override
   public String toString() {
     return this.role.getAuthority();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(role);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
+    Role other = (Role) obj;
+    return role == other.role;
   }
 }

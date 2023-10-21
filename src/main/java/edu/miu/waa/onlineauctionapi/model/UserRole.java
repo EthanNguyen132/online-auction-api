@@ -15,7 +15,7 @@ public class UserRole {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne @JsonBackReference private User user;
+  @ManyToOne private User user;
 
   @ManyToOne private Role role;
 
