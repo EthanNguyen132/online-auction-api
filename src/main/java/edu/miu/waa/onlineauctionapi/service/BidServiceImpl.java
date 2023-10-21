@@ -10,6 +10,9 @@ import edu.miu.waa.onlineauctionapi.repository.BillingRepository;
 import edu.miu.waa.onlineauctionapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -70,6 +73,11 @@ public class BidServiceImpl implements BidService {
     billingRepository.save(billing);
 
     return BidResponse.builder().success(true).build();
+  }
+
+  @Override
+  public List<Bid> findByUserIdOrderByProductIdAscBidDateDesc(String userId) {
+    return bidRepository.findByUserEmailOrderByProductIdAscBidDateDesc(userId);  
   }
 
 

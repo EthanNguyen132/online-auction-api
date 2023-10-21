@@ -25,8 +25,7 @@ import org.springframework.stereotype.Service;
 public class ProductServiceImpl implements ProductService {
   private final ProductRepository productRepository;
 
-  @Autowired
-  private BidRepository bidRepository;
+  private final BidRepository bidRepository;
 
   @Override
   public Product saveProduct(Product product) {
