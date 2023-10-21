@@ -98,7 +98,8 @@ public class SellerProductController {
     List<ProductImage> images = new ArrayList<>();
 
     for (MultipartFile file : files) {
-      String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+//      String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+      String fileName = createFilename();
 
       File dir = new File(FILE_PATH_ROOT);
       if (!dir.exists()) {
@@ -116,6 +117,10 @@ public class SellerProductController {
     }
 
     return images;
+  }
+
+  private String createFilename() {
+      return "product-" + System.currentTimeMillis();
   }
 
   // root path for image files
