@@ -1,15 +1,5 @@
 package edu.miu.waa.onlineauctionapi.service;
 
-import java.util.Date;
-import java.util.regex.Pattern;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import edu.miu.waa.onlineauctionapi.dto.LoginRequest;
 import edu.miu.waa.onlineauctionapi.dto.RegistrationRequest;
 import edu.miu.waa.onlineauctionapi.dto.TokenResponse;
@@ -23,7 +13,13 @@ import edu.miu.waa.onlineauctionapi.repository.UserRepository;
 import edu.miu.waa.onlineauctionapi.security.JwtTokenManager;
 import edu.miu.waa.onlineauctionapi.security.RoleEnum;
 import jakarta.transaction.Transactional;
+import java.util.Date;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -47,9 +43,9 @@ public class UserServiceImpl implements UserService {
     }
     throw new InvalidInputException("Incorrect email or password :)");
   }
-  
+
   public User findUser(String email) {
-      return userRepository.findByEmail(email);
+    return userRepository.findByEmail(email);
   }
 
   @Transactional

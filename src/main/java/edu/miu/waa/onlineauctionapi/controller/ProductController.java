@@ -59,17 +59,13 @@ public class ProductController {
     Bid currentBid = bidService.getCurrentBidByProductId(productId);
 
     BidDto bidDto =
-            BidDto.builder()
-                    .totalBids(bidService.countTotalBidsByProductId(productId))
-                    .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
-                    .bidStartPrice(product.getBidStartPrice())
-                    .deposit(product.getDeposit())
-                    .build();
-    BidResponse res =
-            BidResponse.builder()
-                    .success(true)
-                    .data(bidDto)
-                    .build();
+        BidDto.builder()
+            .totalBids(bidService.countTotalBidsByProductId(productId))
+            .currentBid(currentBid == null ? 0 : currentBid.getBidPrice())
+            .bidStartPrice(product.getBidStartPrice())
+            .deposit(product.getDeposit())
+            .build();
+    BidResponse res = BidResponse.builder().success(true).data(bidDto).build();
     return res;
   }
 }

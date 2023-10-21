@@ -1,9 +1,7 @@
 package edu.miu.waa.onlineauctionapi.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.util.Date;
-
 import lombok.Data;
 
 @Entity

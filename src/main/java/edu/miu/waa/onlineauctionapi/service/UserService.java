@@ -12,7 +12,6 @@ public interface UserService {
   public TokenResponse registerNormalUser(RegistrationRequest reg);
 
   public TokenResponse registerAdmin(RegistrationRequest reg);
-  
-  public User findUser(String email);
 
+  public User findUser(String email);
 }

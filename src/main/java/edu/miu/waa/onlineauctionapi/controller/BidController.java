@@ -2,9 +2,7 @@ package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.dto.BidResponse;
-import edu.miu.waa.onlineauctionapi.dto.ProductResponse;
 import edu.miu.waa.onlineauctionapi.model.Bid;
-import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.model.User;
 import edu.miu.waa.onlineauctionapi.service.BidService;
 import edu.miu.waa.onlineauctionapi.service.ProductService;
@@ -19,8 +17,6 @@ public class BidController {
   private final BidService bidService;
   private final UserService userService;
   private final ProductService productService;
-
-
 
   @PostMapping
   public BidResponse addBid(@RequestBody Bid bid) {

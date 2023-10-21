@@ -8,9 +8,8 @@ import lombok.Setter;
 @Setter
 @Builder
 public class BidDto {
-    private int totalBids;
-    private double currentBid;
-    private double bidStartPrice;
-    private double deposit;
-
+  private int totalBids;
+  private double currentBid;
+  private double bidStartPrice;
+  private double deposit;
 }
