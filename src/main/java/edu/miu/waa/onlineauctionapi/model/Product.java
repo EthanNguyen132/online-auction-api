@@ -34,4 +34,8 @@ public class Product {
 
   private String owner;
   private Date created;
+  
+  @Transient
+    private long bidCount;
+
 }

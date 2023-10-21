@@ -2,6 +2,7 @@ package edu.miu.waa.onlineauctionapi.service;
 
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.model.Product;
+import edu.miu.waa.onlineauctionapi.repository.BidRepository;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 
 import java.time.LocalDate;
@@ -10,7 +11,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +24,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
   private final ProductRepository productRepository;
+
+  @Autowired
+  private BidRepository bidRepository;
 
   @Override
   public Product saveProduct(Product product) {
@@ -50,9 +58,16 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public Optional<Product> findById(long id) {
-    return productRepository.findById(id);
+      Optional<Product> productOptional = productRepository.findById(id);
+  
+      productOptional.ifPresent(product -> {
+          long bidCount = bidRepository.countBidsByProductId(id);
+          product.setBidCount(bidCount);
+      });
+  
+      return productOptional;
   }
-
+  
   @Override
   public void delete(Product product) {
     productRepository.delete(product);
@@ -60,6 +75,12 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   public List<Product> getSellerProducts(String owner) {
-    return productRepository.findByOwner(owner);
+    List<Object[]> results = productRepository.findProductsByOwnerWithBidCount(owner);
+        return results.stream().map(result -> {
+            Product product = (Product) result[0];
+            long bidCount = (long) result[1];
+            product.setBidCount(bidCount);
+            return product;
+        }).collect(Collectors.toList());
   }
 }

@@ -12,6 +12,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,12 +36,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(Constants.SELLER_PRODUCTS_URL_PREFIX)
 public class SellerProductController {
 
-  @Autowired private ProductService productService;
+  @Autowired
+  private ProductService productService;
 
   @GetMapping
   public List<Product> getSellerProducts(Authentication authentication) {
-    var userEmail =
-        ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
+    var userEmail = ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
     return productService.getSellerProducts(userEmail);
   }
 
@@ -51,25 +53,33 @@ public class SellerProductController {
   @PutMapping("/{id}")
   public ResponseEntity<Product> updateProduct(
       @PathVariable Long id, @RequestBody Product updatedProduct) {
-    return productService
-        .findById(id)
-        .map(
-            product -> {
-              product.setName(updatedProduct.getName());
-              product.setDescription(updatedProduct.getDescription());
-              product.setCategories(updatedProduct.getCategories());
-              product.setBidStartPrice(updatedProduct.getBidStartPrice());
-              product.setDeposit(updatedProduct.getDeposit());
-              product.setBidDueDate(updatedProduct.getBidDueDate());
-              product.setPaymentDueDate(updatedProduct.getPaymentDueDate());
-              product.setStatus(updatedProduct.getStatus());
-              product.setImages(updatedProduct.getImages());
-              product.setShippingInformation(updatedProduct.getShippingInformation());
-              product.setShippingInformation(updatedProduct.getShippingInformation());
-              product.setConditionOfSale(updatedProduct.getConditionOfSale());
-              return new ResponseEntity<>(productService.saveProduct(product), HttpStatus.OK);
-            })
-        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    Optional<Product> optionalProduct = productService.findById(id);
+
+    if (optionalProduct.isPresent()) {
+      Product p = optionalProduct.get();
+
+      if (p.getBidCount() > 0) {
+        // error cannot edit product
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN); 
+      }
+
+      p.setName(updatedProduct.getName());
+      p.setDescription(updatedProduct.getDescription());
+      p.setCategories(updatedProduct.getCategories());
+      p.setBidStartPrice(updatedProduct.getBidStartPrice());
+      p.setDeposit(updatedProduct.getDeposit());
+      p.setBidDueDate(updatedProduct.getBidDueDate());
+      p.setPaymentDueDate(updatedProduct.getPaymentDueDate());
+      p.setStatus(updatedProduct.getStatus());
+      p.setImages(updatedProduct.getImages());
+      p.setShippingInformation(updatedProduct.getShippingInformation());
+      p.setShippingInformation(updatedProduct.getShippingInformation());
+      p.setConditionOfSale(updatedProduct.getConditionOfSale());
+      return new ResponseEntity<>(productService.saveProduct(p), HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
   }
 
   @GetMapping("/{id}")
@@ -98,7 +108,8 @@ public class SellerProductController {
     List<ProductImage> images = new ArrayList<>();
 
     for (MultipartFile file : files) {
-//      String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+      // String fileName =
+      // StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
       String fileName = createFilename();
 
       File dir = new File(FILE_PATH_ROOT);
@@ -120,7 +131,7 @@ public class SellerProductController {
   }
 
   private String createFilename() {
-      return "product-" + System.currentTimeMillis();
+    return "product-" + System.currentTimeMillis();
   }
 
   // root path for image files
