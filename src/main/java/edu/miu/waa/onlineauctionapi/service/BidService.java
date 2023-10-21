@@ -1,5 +1,6 @@
 package edu.miu.waa.onlineauctionapi.service;
 
+import edu.miu.waa.onlineauctionapi.dto.BidResponse;
 import edu.miu.waa.onlineauctionapi.model.Bid;
 
 public interface BidService {
@@ -10,4 +11,6 @@ public interface BidService {
   public boolean hasDeposit(long userId, long productId);
 
   public Bid getCurrentBidByProductId(long productId);
+
+  public BidResponse makeDeposit(Bid bid);
 }

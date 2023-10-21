@@ -1,7 +1,8 @@
 package edu.miu.waa.onlineauctionapi.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.util.Date;
+
 import lombok.Data;
 
 @Entity
@@ -15,7 +16,7 @@ public class Billing {
   private String type; // debit/credit
   private String details; // deposit/refund
   private double balance;
-  private LocalDate transactionDate;
+  private Date transactionDate;
 
   @ManyToOne private User user;
 }
