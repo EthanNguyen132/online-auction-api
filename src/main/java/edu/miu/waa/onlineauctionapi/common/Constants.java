@@ -25,5 +25,6 @@ public class Constants {
   public static final String AUTHORIZATION = "Authorization";
   public static final String TOKEN_PREFIX = "Bearer ";
   public static final String ROLE_CLAIM = "roles";
+  public static final String NAME_CLAIM = "name";
   public static final String AUTHORITY_PREFIX = "ROLE_";
 }

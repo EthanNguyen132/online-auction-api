@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 public class RegistrationRequest {
 
   private String email;
+  private String name;
+  private String licenseNumber;
   private String password;
   private RoleEnum role;
 }

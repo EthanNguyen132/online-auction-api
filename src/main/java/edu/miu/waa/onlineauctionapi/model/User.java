@@ -27,6 +27,13 @@ public class User implements UserDetails {
 
   private String password;
 
+  private String name;
+  
+  @Column(unique = true)
+  private String licenseNumber;
+
+  private double currentBalance;
+
   @JsonManagedReference
   @OneToMany(
       mappedBy = "user",
@@ -79,6 +86,4 @@ public class User implements UserDetails {
   public boolean isEnabled() {
     return true;
   }
-
-  private double currentBalance;
 }

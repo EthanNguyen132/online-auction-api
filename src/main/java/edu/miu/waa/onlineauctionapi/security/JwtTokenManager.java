@@ -1,16 +1,21 @@
 package edu.miu.waa.onlineauctionapi.security;
 
+import static edu.miu.waa.onlineauctionapi.common.Constants.NAME_CLAIM;
 import static edu.miu.waa.onlineauctionapi.common.Constants.ROLE_CLAIM;
 import static java.util.stream.Collectors.toList;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+
+import edu.miu.waa.onlineauctionapi.model.User;
 
 @Component
 public class JwtTokenManager {
@@ -23,7 +28,7 @@ public class JwtTokenManager {
     this.publicKey = publicKey;
   }
 
-  public String create(UserDetails principal, Date issueDate, Date expiryDate) {
+  public String create(User principal, Date issueDate, Date expiryDate) {
     return JWT.create()
         .withIssuer("Online Action API")
         .withSubject(principal.getUsername())
@@ -35,6 +40,7 @@ public class JwtTokenManager {
                       return e.getAuthority();
                     })
                 .collect(toList())) // ADMIN/SELLER/CUSTOMER
+        .withClaim(NAME_CLAIM, principal.getName())
         .withIssuedAt(issueDate)
         .withExpiresAt(expiryDate)
         // .sign(Algorithm.HMAC512(SECRET_KEY.getBytes(StandardCharsets.UTF_8)));
