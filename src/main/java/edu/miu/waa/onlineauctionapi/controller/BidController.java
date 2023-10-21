@@ -49,16 +49,6 @@ public class BidController {
 
   @PostMapping("/deposit")
   public BidResponse makeDeposit(@RequestBody Bid bid) {
-    String email = bid.getUser().getEmail();
-
-    // check valid user
-    User user = userService.findUser(email);
-    if (user == null) {
-      return BidResponse.builder().success(false).message("Invalid user").build();
-    }
-    bid.setUser(user);
-    // save bid
-    bidService.addBid(bid);
-    return BidResponse.builder().success(true).build();
+    return bidService.makeDeposit(bid);
   }
 }
