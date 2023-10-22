@@ -6,6 +6,7 @@ import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -36,14 +37,14 @@ public class ScheduledBidService {
     LOG.info(
         "Checking if any product is expired ready for bid settlement at {}",
         dateFormat.format(new Date()));
-    LocalDate currentDate = LocalDate.now();
+    LocalDateTime now = LocalDateTime.now();
     Optional<List<Product>> activeProducts =
         productRepository.findByStatus(ProductStatus.RELEASE.getName());
     activeProducts.ifPresent(
         products -> {
           products.forEach(
               product -> {
-                if (product.getBidDueDate().isBefore(currentDate)) {
+                if (product.getBidDueDate().isBefore(now)) {
                   product.setStatus(ProductStatus.READY_FOR_SETTLEMENT.getName());
                   productRepository.save(product);
                 }

@@ -1,22 +1,29 @@
 package edu.miu.waa.onlineauctionapi.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.springframework.stereotype.Service;
+
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.common.TransactionType;
 import edu.miu.waa.onlineauctionapi.dto.BidResponse;
 import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
-import edu.miu.waa.onlineauctionapi.model.*;
+import edu.miu.waa.onlineauctionapi.model.Bid;
+import edu.miu.waa.onlineauctionapi.model.BidStatus;
+import edu.miu.waa.onlineauctionapi.model.Billing;
+import edu.miu.waa.onlineauctionapi.model.Product;
+import edu.miu.waa.onlineauctionapi.model.User;
 import edu.miu.waa.onlineauctionapi.repository.BidRepository;
 import edu.miu.waa.onlineauctionapi.repository.BillingRepository;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import edu.miu.waa.onlineauctionapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -90,9 +97,9 @@ public class BidServiceImpl implements BidService {
   @Transactional
   public void settleProductBid(Product product) throws BidProcessingException {
     // check product bid due date
-    LocalDate currentDate = LocalDate.now();
-    LocalDate bidDueDate = product.getBidDueDate();
-    if (currentDate.isBefore(bidDueDate)) {
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime bidDueDate = product.getBidDueDate();
+    if (now.isBefore(bidDueDate)) {
       LOG.error("Bid due date is not reached yet for product id {}", product.getId());
       throw new BidProcessingException("Bid due date is not reached yet");
     }
@@ -131,7 +138,7 @@ public class BidServiceImpl implements BidService {
     // product sold date is the same as bid date, or we can have sold_date column in product tbl
     // mark product winner deposit as final, i.e. deposit row of the same buyer to winner = 1
     Bid winnerDeposit =
-        bidRepository.findTop1ByProductIdAndByUserId(product.getId(), buyer.getId());
+        bidRepository.findTop1ByProductIdAndUserId(product.getId(), buyer.getId());
     winnerDeposit.setWinner(true);
 
     // credit to seller, debit to buyer in transaction tbl
