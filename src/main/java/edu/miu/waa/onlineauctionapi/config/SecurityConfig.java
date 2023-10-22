@@ -2,6 +2,7 @@ package edu.miu.waa.onlineauctionapi.config;
 
 import static edu.miu.waa.onlineauctionapi.common.Constants.ADMIN_URLs;
 import static edu.miu.waa.onlineauctionapi.common.Constants.AUTHORITY_PREFIX;
+import static edu.miu.waa.onlineauctionapi.common.Constants.BID_MANUAL_SETTLEMENT_URLs;
 import static edu.miu.waa.onlineauctionapi.common.Constants.PRODUCTS_URLs;
 import static edu.miu.waa.onlineauctionapi.common.Constants.ROLE_CLAIM;
 import static edu.miu.waa.onlineauctionapi.common.Constants.SELLER_PRODUCTS_STATICS_URLs;
@@ -109,6 +110,8 @@ public class SecurityConfig {
                         RoleEnum.SELLER.getAuthority()) // allow seller to see other people products
                     .requestMatchers(SELLER_PRODUCTS_URLs)
                     .hasAuthority(RoleEnum.SELLER.getAuthority())
+                    .requestMatchers(BID_MANUAL_SETTLEMENT_URLs)
+                    .hasAuthority(RoleEnum.ADMIN.getAuthority())
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(

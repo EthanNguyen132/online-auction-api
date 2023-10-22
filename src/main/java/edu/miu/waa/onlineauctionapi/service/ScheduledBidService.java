@@ -39,7 +39,7 @@ public class ScheduledBidService {
 
   private void settleBidsForProduct(Product product) {
     try {
-      bidService.settleProductBid(product);
+      bidService.settleProductBids(product);
     } catch (BidProcessingException e) {
       LOG.error("Error while settling bids for product {}", product.getId());
       LOG.error(e.getMessage(), e);

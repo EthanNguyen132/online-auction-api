@@ -17,7 +17,9 @@ public interface BidService {
 
   public BidResponse makeDeposit(Bid bid);
 
-  public void settleProductBid(Product product) throws BidProcessingException;
+  public void settleProductBids(Product product) throws BidProcessingException;
+
+  public void settleProductBidsById(long productId) throws BidProcessingException;
 
   public List<Bid> findByUserIdOrderByProductIdAscBidDateDesc(String userId);
 }

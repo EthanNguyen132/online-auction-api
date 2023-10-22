@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -89,8 +90,19 @@ public class BidServiceImpl implements BidService {
     return bidRepository.findByUserEmailOrderByProductIdAscBidDateDesc(userId);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @Transactional
-  public void settleProductBid(Product product) throws BidProcessingException {
+  public void settleProductBidsById(long productId) throws BidProcessingException {
+    Product product =
+        productRepository
+            .findById(productId)
+            .orElseThrow(
+                () -> new BidProcessingException("Product not found with ID: " + productId));
+    settleProductBids(product);
+  }
+
+  @Transactional
+  public void settleProductBids(Product product) throws BidProcessingException {
     try {
       LOG.info("Settling bids for product id {}", product.getId());
       // check product bid due date
