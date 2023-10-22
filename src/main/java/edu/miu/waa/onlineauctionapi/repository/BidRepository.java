@@ -25,5 +25,4 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   List<Bid> findByUserEmailOrderByProductIdAscBidDateDesc(String userId);
 
   List<Bid> findByProductIdAndDepositGreaterThan(long productId, double deposit);
-
 }

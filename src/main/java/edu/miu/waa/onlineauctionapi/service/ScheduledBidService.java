@@ -4,10 +4,7 @@ import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
-import jakarta.transaction.Transactional;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -34,35 +31,19 @@ public class ScheduledBidService {
         productRepository.findByStatus(ProductStatus.RELEASE.getName());
 
     if (products.isPresent()) {
-        products.get().forEach(product -> {
-            try {
-                bidService.settleProductBid(product);
-            } catch (BidProcessingException e) {
-                LOG.error("Error while settling bids for product {}", product.getId());
-                LOG.error(e.getMessage(), e);
-            }
-        });
+      products
+          .get()
+          .forEach(
+              product -> {
+                try {
+                  bidService.settleProductBid(product);
+                } catch (BidProcessingException e) {
+                  LOG.error("Error while settling bids for product {}", product.getId());
+                  LOG.error(e.getMessage(), e);
+                }
+              });
     } else {
-        LOG.info("No active products found");
+      LOG.info("No active products found");
     }
   }
-
-//  @Scheduled(fixedRateString = "${app.scheduling.task.interval}")
-//  @Transactional
-//  public void markExpiredAndReadyForBidProducts() {
-//    LOG.info("Checking if active products that due for bid settlement");
-//    LocalDateTime now = LocalDateTime.now();
-//    Optional<List<Product>> activeProducts =
-//        productRepository.findByStatus(ProductStatus.RELEASE.getName());
-//    activeProducts.ifPresent(
-//        products -> {
-//          products.forEach(
-//              product -> {
-//                if (product.getBidDueDate().isBefore(now)) {
-//                  product.setStatus(ProductStatus.READY_FOR_SETTLEMENT.getName());
-//                  productRepository.save(product);
-//                }
-//              });
-//        });
-//  }
 }

@@ -15,9 +15,7 @@ import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import edu.miu.waa.onlineauctionapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -104,20 +102,20 @@ public class BidServiceImpl implements BidService {
       return;
     }
 
-    // get the highest bid
-    Bid highestBid = bidRepository.findTop1ByProductIdOrderByBidPriceDesc(product.getId());
-    if (highestBid == null) {
+    List<Bid> allBid = bidRepository.findAllByProductId(product.getId());
+    if (allBid.isEmpty()) {
       // no bid for this product, mark as expired
       product.setStatus(ProductStatus.EXPIRED.getName());
       productRepository.save(product);
       LOG.info("No bid found for product id {}", product.getId());
       return;
     }
-    List<Bid> allBid = bidRepository.findAllByProductId(product.getId());
+
+    Bid highestBid = bidRepository.findTop1ByProductIdOrderByBidPriceDesc(product.getId());
 
     // check if buyer current balance is enough to pay for the product
-    double buyerBalance = highestBid.getUser().getCurrentBalance();
-    if (buyerBalance < highestBid.getBidPrice()) {
+    double winnerCurrentBalanceAfterDeposit = highestBid.getUser().getCurrentBalance();
+    if (winnerCurrentBalanceAfterDeposit < highestBid.getBidPrice()) {
       LOG.info(
           "Buyer balance is not enough to pay for the product {} with name {}",
           product.getId(),
@@ -163,8 +161,15 @@ public class BidServiceImpl implements BidService {
     Bid winnerDeposit = bidRepository.findTop1ByProductIdAndUserId(product.getId(), buyer.getId());
     winnerDeposit.setWinner(true);
 
-    LOG.info("crediting/debiting to seller/buyer & losers");
+    LOG.info("Update winner's highest bid & deposit...");
+    bidRepository.save(highestBid);
+    bidRepository.save(winnerDeposit);
+    productRepository.save(product);
+
+    LOG.info("crediting/debiting to seller/buyer...");
     double soldPrice = highestBid.getBidPrice();
+    double winnerFinalBalance =
+        winnerCurrentBalanceAfterDeposit - soldPrice + winnerDeposit.getDeposit();
     //    Billing latestBuyerTransaction =
     // billingRepository.findTop1ByUserIdOrderByTransactionDateDesc(buyer.getId());
     Date transactionDate = new Date();
@@ -175,7 +180,7 @@ public class BidServiceImpl implements BidService {
                     - highestBid
                         .getDeposit()) //  debit to buyer soldPrice - deposit in transaction tbl
             .user(buyer)
-            .balance(buyerBalance - soldPrice)
+            .balance(winnerFinalBalance)
             .type("Debit")
             .transactionDate(transactionDate)
             .details(
@@ -189,11 +194,12 @@ public class BidServiceImpl implements BidService {
 
     User seller = userRepository.findByEmail(product.getOwner());
     double sellerBalance = seller.getCurrentBalance();
+    double finalSellerBalance = sellerBalance + soldPrice;
     Billing sellerBilling =
         Billing.builder()
             .amount(soldPrice) // credit to seller full amount
             .user(seller)
-            .balance(sellerBalance + soldPrice)
+            .balance(finalSellerBalance)
             .type("Credit")
             .transactionDate(transactionDate)
             .details(
@@ -204,6 +210,10 @@ public class BidServiceImpl implements BidService {
                     + " with bid price "
                     + soldPrice)
             .build();
+
+    LOG.info("Update billing/transactions for winner & seller...");
+    billingRepository.save(buyerBilling);
+    billingRepository.save(sellerBilling);
 
     LOG.info("Refunding to losers...");
     List<Bid> allDeposits = bidRepository.findByProductIdAndDepositGreaterThan(product.getId(), 0);
@@ -218,8 +228,11 @@ public class BidServiceImpl implements BidService {
             bid -> {
               // only 1 deposit per user
               User user = bid.getUser();
-              // refund deposit to each lose
-              user.setCurrentBalance(user.getCurrentBalance() + bid.getDeposit());
+              // refund deposit to each loser
+              user.setCurrentBalance(
+                  user.getCurrentBalance()
+                      + bid.getDeposit()); // error here, shoulld take balance from billing but not
+              // user
               userRepository.save(user);
 
               // add new records in billing/transactions table
@@ -241,18 +254,9 @@ public class BidServiceImpl implements BidService {
               billingRepository.save(billing);
             });
 
-    LOG.info("Record billing/transactions for winner & seller...");
-    billingRepository.save(buyerBilling);
-    billingRepository.save(sellerBilling);
-
-    LOG.info("Update winner's highest bid & deposit...");
-    bidRepository.save(highestBid);
-    bidRepository.save(winnerDeposit);
-    productRepository.save(product);
-
     LOG.info("Update buyer & seller balance...");
-    seller.setCurrentBalance(sellerBalance + soldPrice);
-    buyer.setCurrentBalance(buyerBalance - soldPrice);
+    seller.setCurrentBalance(finalSellerBalance);
+    buyer.setCurrentBalance(winnerFinalBalance);
     userRepository.save(seller);
     userRepository.save(buyer);
     LOG.info("This product is settled successfully");
