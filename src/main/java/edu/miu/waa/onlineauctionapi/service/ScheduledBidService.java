@@ -1,6 +1,7 @@
 package edu.miu.waa.onlineauctionapi.service;
 
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
+import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -22,32 +23,46 @@ public class ScheduledBidService {
   private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
   private final ProductRepository productRepository;
+  private final BidService bidService;
 
   @Scheduled(
       fixedRateString = "${app.scheduling.task.interval}",
       initialDelayString = "${app.scheduling.task.initialDelay}")
   public void settleBids() {
-    LOG.info("Settling all expired bid at {}", dateFormat.format(new Date()));
+    LOG.info("Settling bids for all active products");
+    Optional<List<Product>> products =
+        productRepository.findByStatus(ProductStatus.RELEASE.getName());
+
+    if (products.isPresent()) {
+        products.get().forEach(product -> {
+            try {
+                bidService.settleProductBid(product);
+            } catch (BidProcessingException e) {
+                LOG.error("Error while settling bids for product {}", product.getId());
+                LOG.error(e.getMessage(), e);
+            }
+        });
+    } else {
+        LOG.info("No active products found");
+    }
   }
 
-  @Scheduled(fixedRateString = "${app.scheduling.task.interval}")
-  @Transactional
-  public void markExpiredAndReadyForBidProducts() {
-    LOG.info(
-        "Checking if any product is expired ready for bid settlement at {}",
-        dateFormat.format(new Date()));
-    LocalDateTime now = LocalDateTime.now();
-    Optional<List<Product>> activeProducts =
-        productRepository.findByStatus(ProductStatus.RELEASE.getName());
-    activeProducts.ifPresent(
-        products -> {
-          products.forEach(
-              product -> {
-                if (product.getBidDueDate().isBefore(now)) {
-                  product.setStatus(ProductStatus.READY_FOR_SETTLEMENT.getName());
-                  productRepository.save(product);
-                }
-              });
-        });
-  }
+//  @Scheduled(fixedRateString = "${app.scheduling.task.interval}")
+//  @Transactional
+//  public void markExpiredAndReadyForBidProducts() {
+//    LOG.info("Checking if active products that due for bid settlement");
+//    LocalDateTime now = LocalDateTime.now();
+//    Optional<List<Product>> activeProducts =
+//        productRepository.findByStatus(ProductStatus.RELEASE.getName());
+//    activeProducts.ifPresent(
+//        products -> {
+//          products.forEach(
+//              product -> {
+//                if (product.getBidDueDate().isBefore(now)) {
+//                  product.setStatus(ProductStatus.READY_FOR_SETTLEMENT.getName());
+//                  productRepository.save(product);
+//                }
+//              });
+//        });
+//  }
 }

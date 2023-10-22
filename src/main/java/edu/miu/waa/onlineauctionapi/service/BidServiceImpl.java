@@ -93,21 +93,35 @@ public class BidServiceImpl implements BidService {
 
   @Transactional
   public void settleProductBid(Product product) throws BidProcessingException {
+    LOG.info("Settling bids for product id {}", product.getId());
     // check product bid due date
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime bidDueDate = product.getBidDueDate();
     if (now.isBefore(bidDueDate)) {
-      LOG.error("Bid due date is not reached yet for product id {}", product.getId());
-      throw new BidProcessingException("Bid due date is not reached yet");
+      LOG.info(
+          "Skipping this product since bid due date is not reached yet for product id {}",
+          product.getId());
+      return;
     }
 
     // get the highest bid
     Bid highestBid = bidRepository.findTop1ByProductIdOrderByBidPriceDesc(product.getId());
+    if (highestBid == null) {
+      // no bid for this product, mark as expired
+      product.setStatus(ProductStatus.EXPIRED.getName());
+      productRepository.save(product);
+      LOG.info("No bid found for product id {}", product.getId());
+      return;
+    }
     List<Bid> allBid = bidRepository.findAllByProductId(product.getId());
 
     // check if buyer current balance is enough to pay for the product
     double buyerBalance = highestBid.getUser().getCurrentBalance();
-    if (buyerBalance > highestBid.getBidPrice()) {
+    if (buyerBalance < highestBid.getBidPrice()) {
+      LOG.info(
+          "Buyer balance is not enough to pay for the product {} with name {}",
+          product.getId(),
+          product.getName());
       // cancelling all the bid for this product, mark product as cancelled too!
       product.setStatus(ProductStatus.CANCELLED.getName());
       Optional.ofNullable(allBid)
@@ -119,32 +133,47 @@ public class BidServiceImpl implements BidService {
                       bidRepository.save(bid);
                     });
               });
-      LOG.error(
-          "Buyer balance is not enough to pay for the product {} with name {}",
-          product.getId(),
-          product.getName());
       return;
     }
 
     User buyer = highestBid.getUser();
-    // update product status to sold
-    product.setStatus(ProductStatus.SOLD.getName());
-    // update product winner to this user bid table, or we can have buyer column in product table
-    highestBid.setWinner(true);
     // product sold price is the same as bid price, or we can have sold_price column in product tbl
     // product sold date is the same as bid date, or we can have sold_date column in product tbl
-    // mark product winner deposit as final, i.e. deposit row of the same buyer to winner = 1
+    LOG.info("marking product as SOLD");
+    product.setStatus(ProductStatus.SOLD.getName());
+
+    // update product winner for this bid, or we can have buyer column in product table
+    LOG.info("updating highest bid & deposit record for winner");
+    highestBid.setWinner(true);
+    highestBid.setStatus(BidStatus.SETTLED);
+    // mark the other bids for this product as expired
+    Optional.ofNullable(allBid)
+        .ifPresent(
+            all -> {
+              all.stream()
+                  .filter(bid -> bid.getId() != highestBid.getId()) // exclude highest bid
+                  .forEach(
+                      bid -> {
+                        bid.setStatus(BidStatus.EXPIRED);
+                        bidRepository.save(bid);
+                      });
+            });
+
+    // mark the deposit record for winner
     Bid winnerDeposit = bidRepository.findTop1ByProductIdAndUserId(product.getId(), buyer.getId());
     winnerDeposit.setWinner(true);
 
-    // credit to seller, debit to buyer in transaction tbl
+    LOG.info("crediting/debiting to seller/buyer & losers");
     double soldPrice = highestBid.getBidPrice();
     //    Billing latestBuyerTransaction =
     // billingRepository.findTop1ByUserIdOrderByTransactionDateDesc(buyer.getId());
     Date transactionDate = new Date();
     Billing buyerBilling =
         Billing.builder()
-            .amount(soldPrice)
+            .amount(
+                soldPrice
+                    - highestBid
+                        .getDeposit()) //  debit to buyer soldPrice - deposit in transaction tbl
             .user(buyer)
             .balance(buyerBalance - soldPrice)
             .type("Debit")
@@ -162,7 +191,7 @@ public class BidServiceImpl implements BidService {
     double sellerBalance = seller.getCurrentBalance();
     Billing sellerBilling =
         Billing.builder()
-            .amount(soldPrice)
+            .amount(soldPrice) // credit to seller full amount
             .user(seller)
             .balance(sellerBalance + soldPrice)
             .type("Credit")
@@ -176,31 +205,56 @@ public class BidServiceImpl implements BidService {
                     + soldPrice)
             .build();
 
-    // save billing
+    LOG.info("Refunding to losers...");
+    List<Bid> allDeposits = bidRepository.findByProductIdAndDepositGreaterThan(product.getId(), 0);
+    allDeposits.stream()
+        .filter(
+            deposit ->
+                !deposit
+                    .getUser()
+                    .getId()
+                    .equals(winnerDeposit.getUser().getId())) // exclude winner
+        .forEach(
+            bid -> {
+              // only 1 deposit per user
+              User user = bid.getUser();
+              // refund deposit to each lose
+              user.setCurrentBalance(user.getCurrentBalance() + bid.getDeposit());
+              userRepository.save(user);
+
+              // add new records in billing/transactions table
+              Billing billing =
+                  Billing.builder()
+                      .amount(bid.getDeposit())
+                      .user(user)
+                      .balance(user.getCurrentBalance())
+                      .type("Credit")
+                      .transactionDate(transactionDate)
+                      .details(
+                          "Refund deposit for product "
+                              + product.getId()
+                              + ": "
+                              + product.getName()
+                              + " with bid price "
+                              + soldPrice)
+                      .build();
+              billingRepository.save(billing);
+            });
+
+    LOG.info("Record billing/transactions for winner & seller...");
     billingRepository.save(buyerBilling);
     billingRepository.save(sellerBilling);
 
-    // save bid records
-    // mark the other bids for this product as expired, mark product as SOLD
-    Optional.ofNullable(allBid)
-        .ifPresent(
-            all -> {
-              all.stream()
-                  .filter(bid -> bid.getId() != highestBid.getId())
-                  .forEach(
-                      bid -> {
-                        bid.setStatus(BidStatus.EXPIRED);
-                        bidRepository.save(bid);
-                      });
-            });
+    LOG.info("Update winner's highest bid & deposit...");
     bidRepository.save(highestBid);
     bidRepository.save(winnerDeposit);
     productRepository.save(product);
 
-    // update balance in User table
+    LOG.info("Update buyer & seller balance...");
     seller.setCurrentBalance(sellerBalance + soldPrice);
     buyer.setCurrentBalance(buyerBalance - soldPrice);
     userRepository.save(seller);
     userRepository.save(buyer);
+    LOG.info("This product is settled successfully");
   }
 }
