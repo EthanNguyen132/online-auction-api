@@ -8,6 +8,11 @@ import edu.miu.waa.onlineauctionapi.service.BidService;
 import edu.miu.waa.onlineauctionapi.service.ProductService;
 import edu.miu.waa.onlineauctionapi.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class BidController {
   private final BidService bidService;
   private final UserService userService;
-  private final ProductService productService;
 
   @PostMapping
   public BidResponse addBid(@RequestBody Bid bid) {
@@ -47,4 +51,14 @@ public class BidController {
   public BidResponse makeDeposit(@RequestBody Bid bid) {
     return bidService.makeDeposit(bid);
   }
+
+  @GetMapping("/my-history")
+    public List<Bid> getMyBidHistory() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); 
+        String userId = authentication.getName();
+
+        var history = bidService.findByUserIdOrderByProductIdAscBidDateDesc(userId);
+
+        return history;
+    }
 }

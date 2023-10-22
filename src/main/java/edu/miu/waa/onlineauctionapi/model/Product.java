@@ -14,6 +14,7 @@ public class Product {
   private long id;
 
   private String name;
+  @Column(length = 2000)
   private String description;
   private double deposit;
   private double bidStartPrice;
@@ -26,9 +27,15 @@ public class Product {
   List<ProductImage> images;
 
   private List<String> categories;
+  @Column(length = 2000)
   private String conditionOfSale;
+  @Column(length = 2000)
   private String shippingInformation;
 
   private String owner;
   private Date created;
+  
+  @Transient
+    private long bidCount;
+
 }

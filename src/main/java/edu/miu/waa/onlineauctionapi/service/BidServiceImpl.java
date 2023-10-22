@@ -82,6 +82,11 @@ public class BidServiceImpl implements BidService {
     return BidResponse.builder().success(true).build();
   }
 
+  @Override
+  public List<Bid> findByUserIdOrderByProductIdAscBidDateDesc(String userId) {
+    return bidRepository.findByUserEmailOrderByProductIdAscBidDateDesc(userId);
+  }
+
   @Transactional
   public void settleProductBid(Product product) throws BidProcessingException {
     // check product bid due date
