@@ -1,7 +1,7 @@
 package edu.miu.waa.onlineauctionapi.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -18,8 +18,8 @@ public class Product {
   private String description;
   private double deposit;
   private double bidStartPrice;
-  private LocalDate bidDueDate;
-  private LocalDate paymentDueDate;
+  private LocalDateTime bidDueDate;
+  private LocalDateTime paymentDueDate;
   private String status; // draft/release
 
   @OneToMany(cascade = CascadeType.ALL)
