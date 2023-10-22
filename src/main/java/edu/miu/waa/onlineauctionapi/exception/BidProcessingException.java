@@ -13,4 +13,8 @@ public class BidProcessingException extends Exception {
   public BidProcessingException(final String message) {
     super(message);
   }
+
+  public BidProcessingException(final String message, Exception e) {
+    super(message);
+  }
 }

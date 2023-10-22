@@ -5,6 +5,7 @@ import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -27,23 +28,26 @@ public class ScheduledBidService {
       initialDelayString = "${app.scheduling.task.initialDelay}")
   public void settleBids() {
     LOG.info("Settling bids for all active products");
-    Optional<List<Product>> products =
-        productRepository.findByStatus(ProductStatus.RELEASE.getName());
+    List<Product> activeProducts = getActiveProducts();
 
-    if (products.isPresent()) {
-      products
-          .get()
-          .forEach(
-              product -> {
-                try {
-                  bidService.settleProductBid(product);
-                } catch (BidProcessingException e) {
-                  LOG.error("Error while settling bids for product {}", product.getId());
-                  LOG.error(e.getMessage(), e);
-                }
-              });
+    if (!activeProducts.isEmpty()) {
+      activeProducts.forEach(this::settleBidsForProduct);
     } else {
       LOG.info("No active products found");
     }
+  }
+
+  private void settleBidsForProduct(Product product) {
+    try {
+      bidService.settleProductBid(product);
+    } catch (BidProcessingException e) {
+      LOG.error("Error while settling bids for product {}", product.getId());
+      LOG.error(e.getMessage(), e);
+    }
+  }
+
+  private List<Product> getActiveProducts() {
+    Optional<List<Product>> products = productRepository.findByStatus(ProductStatus.RELEASE);
+    return products.orElse(Collections.emptyList());
   }
 }

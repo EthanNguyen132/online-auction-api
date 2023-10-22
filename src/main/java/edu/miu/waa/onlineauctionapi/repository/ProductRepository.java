@@ -1,5 +1,6 @@
 package edu.miu.waa.onlineauctionapi.repository;
 
+import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Repository;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
   Page<Product> findByStatusAndNameContainsAndBidDueDateAfterOrderByIdAsc(
-      String status, String name, LocalDateTime bidDueDate, Pageable pageable);
+      ProductStatus status, String name, LocalDateTime bidDueDate, Pageable pageable);
 
   @Query(
       "SELECT p, COUNT(b) FROM Product p LEFT JOIN Bid b ON p.id = b.product.id "
@@ -24,5 +25,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
   List<Product> findByOwner(String owner);
 
-  Optional<List<Product>> findByStatus(String status);
+  Optional<List<Product>> findByStatus(ProductStatus status);
 }
