@@ -11,16 +11,13 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,12 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(Constants.SELLER_PRODUCTS_URL_PREFIX)
 public class SellerProductController {
 
-  @Autowired
-  private ProductService productService;
+  @Autowired private ProductService productService;
 
   @GetMapping
   public List<Product> getSellerProducts(Authentication authentication) {
-    var userEmail = ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
+    var userEmail =
+        ((org.springframework.security.oauth2.jwt.Jwt) authentication.getPrincipal()).getSubject();
     return productService.getSellerProducts(userEmail);
   }
 
@@ -60,7 +57,7 @@ public class SellerProductController {
 
       if (p.getBidCount() > 0) {
         // error cannot edit product
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN); 
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
       }
 
       p.setName(updatedProduct.getName());
@@ -79,7 +76,6 @@ public class SellerProductController {
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
   }
 
   @GetMapping("/{id}")

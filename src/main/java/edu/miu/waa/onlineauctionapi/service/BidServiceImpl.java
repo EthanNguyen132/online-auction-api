@@ -1,14 +1,5 @@
 package edu.miu.waa.onlineauctionapi.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.springframework.stereotype.Service;
-
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.common.TransactionType;
 import edu.miu.waa.onlineauctionapi.dto.BidResponse;
@@ -23,7 +14,13 @@ import edu.miu.waa.onlineauctionapi.repository.BillingRepository;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import edu.miu.waa.onlineauctionapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -137,8 +134,7 @@ public class BidServiceImpl implements BidService {
     // product sold price is the same as bid price, or we can have sold_price column in product tbl
     // product sold date is the same as bid date, or we can have sold_date column in product tbl
     // mark product winner deposit as final, i.e. deposit row of the same buyer to winner = 1
-    Bid winnerDeposit =
-        bidRepository.findTop1ByProductIdAndUserId(product.getId(), buyer.getId());
+    Bid winnerDeposit = bidRepository.findTop1ByProductIdAndUserId(product.getId(), buyer.getId());
     winnerDeposit.setWinner(true);
 
     // credit to seller, debit to buyer in transaction tbl
