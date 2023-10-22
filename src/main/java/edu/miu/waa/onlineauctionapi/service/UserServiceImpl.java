@@ -3,8 +3,8 @@ package edu.miu.waa.onlineauctionapi.service;
 import edu.miu.waa.onlineauctionapi.dto.LoginRequest;
 import edu.miu.waa.onlineauctionapi.dto.RegistrationRequest;
 import edu.miu.waa.onlineauctionapi.dto.TokenResponse;
-import edu.miu.waa.onlineauctionapi.exception.GenericAlreadyExistsException;
 import edu.miu.waa.onlineauctionapi.exception.InvalidInputException;
+import edu.miu.waa.onlineauctionapi.exception.RecordAlreadyExistsException;
 import edu.miu.waa.onlineauctionapi.model.Role;
 import edu.miu.waa.onlineauctionapi.model.User;
 import edu.miu.waa.onlineauctionapi.model.UserRole;
@@ -55,10 +55,15 @@ public class UserServiceImpl implements UserService {
       throw new InvalidInputException("The provided email is invalid!");
     }
 
-    // check existing user
+    // check existing user & license number
     Integer count = userRepository.countUserByEmail(reg.getEmail());
+    Integer count2 = userRepository.countUserByLicenseNumber(reg.getLicenseNumber());
     if (count > 0) {
-      throw new GenericAlreadyExistsException("This email has been used");
+      throw new RecordAlreadyExistsException("This email or license has been used");
+    }
+    if (count2 > 0) {
+      throw new RecordAlreadyExistsException(
+          "This license number has been used, we only allow one account per license number");
     }
 
     User user = toEntity(reg); // this can only copy basic props
@@ -80,7 +85,7 @@ public class UserServiceImpl implements UserService {
   public TokenResponse registerAdmin(RegistrationRequest reg) {
     Integer count = userRepository.countUserByEmail(reg.getEmail());
     if (count > 0) {
-      throw new GenericAlreadyExistsException("This email has been used");
+      throw new RecordAlreadyExistsException("This email has been used");
     }
 
     User user = toEntity(reg); // this can only copy basic props

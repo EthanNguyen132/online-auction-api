@@ -19,7 +19,7 @@ public class ControllerExceptionHandler {
     return message;
   }
 
-  @ExceptionHandler(value = {GenericAlreadyExistsException.class, InvalidInputException.class})
+  @ExceptionHandler(value = {RecordAlreadyExistsException.class, InvalidInputException.class})
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   public ErrorResponse clientInputException(Exception ex, WebRequest request) {
     ErrorResponse message =

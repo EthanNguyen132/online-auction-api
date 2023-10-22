@@ -3,7 +3,7 @@ POST localhost:8080/api/v1/auth/token
 Content-Type: application/json
 
 {
-  "username": "admin",
+  "email": "admin@gmail.com",
   "password": "admin"
 }
 
@@ -16,6 +16,21 @@ Content-Type: application/json
   "password": "seller",
   "role": "ROLE_SELLER"
 }
+
+### Register customer
+POST localhost:8080/api/v1/users
+Content-Type: application/json
+
+{
+  "email": "cusstomer3@gmail.com",
+  "password": "seller",
+  "role": "ROLE_CUSTOMER"
+}
+
+### Settle product bid
+POST localhost:8080/api/v1/bids/settle/1
+Authorization: Bearer: $ADMIN_TOKEN
+
 ### Register admin
 POST localhost:8080/api/v1/admins
 Content-Type: application/json

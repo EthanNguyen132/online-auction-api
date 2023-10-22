@@ -1,16 +1,15 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
+import edu.miu.waa.onlineauctionapi.dto.ApiResponse;
 import edu.miu.waa.onlineauctionapi.dto.BidResponse;
+import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
 import edu.miu.waa.onlineauctionapi.model.Bid;
 import edu.miu.waa.onlineauctionapi.model.User;
 import edu.miu.waa.onlineauctionapi.service.BidService;
-import edu.miu.waa.onlineauctionapi.service.ProductService;
 import edu.miu.waa.onlineauctionapi.service.UserService;
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -53,12 +52,19 @@ public class BidController {
   }
 
   @GetMapping("/my-history")
-    public List<Bid> getMyBidHistory() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); 
-        String userId = authentication.getName();
+  public List<Bid> getMyBidHistory() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String userId = authentication.getName();
 
-        var history = bidService.findByUserIdOrderByProductIdAscBidDateDesc(userId);
+    var history = bidService.findByUserIdOrderByProductIdAscBidDateDesc(userId);
 
-        return history;
-    }
+    return history;
+  }
+
+  @PostMapping("/settle/{productId}")
+  public ApiResponse<?> settleProductBids(@PathVariable long productId)
+      throws BidProcessingException {
+    bidService.settleProductBidsById(productId);
+    return ApiResponse.builder().success(true).build();
+  }
 }

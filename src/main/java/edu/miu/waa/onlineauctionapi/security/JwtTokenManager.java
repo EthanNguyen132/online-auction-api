@@ -4,18 +4,14 @@ import static edu.miu.waa.onlineauctionapi.common.Constants.NAME_CLAIM;
 import static edu.miu.waa.onlineauctionapi.common.Constants.ROLE_CLAIM;
 import static java.util.stream.Collectors.toList;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import edu.miu.waa.onlineauctionapi.model.User;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
-
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-
-import edu.miu.waa.onlineauctionapi.model.User;
 
 @Component
 public class JwtTokenManager {

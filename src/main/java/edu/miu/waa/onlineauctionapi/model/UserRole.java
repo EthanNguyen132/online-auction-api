@@ -1,8 +1,6 @@
 package edu.miu.waa.onlineauctionapi.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,10 +21,9 @@ public class UserRole {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  
-  @JsonBackReference
-  @ManyToOne private User user;
-  
+
+  @JsonBackReference @ManyToOne private User user;
+
   @ManyToOne private Role role;
 
   public UserRole(User user, Role role) {
