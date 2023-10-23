@@ -18,4 +18,6 @@ public interface ProductService {
   public void delete(Product product);
 
   public List<Product> getSellerProducts(String owner);
+
+  public List<Product> findAllActiveProductsForSettlement();
 }

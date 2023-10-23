@@ -15,7 +15,6 @@ public class Constants {
   public static final String SELLER_PRODUCTS_URLs = API_URL_v1_PREFIX + "/seller/products/**";
   public static final String SELLER_PRODUCTS_STATICS_URLs =
       API_URL_v1_PREFIX + "/seller/products/statics/**";
-  public static final String BID_MANUAL_SETTLEMENT_URLs = API_URL_v1_PREFIX + "/bids/settle/**";
 
   public static final String PRODUCTS_URL_PREFIX = API_URL_v1_PREFIX + "/products";
   public static final String SELLER_PRODUCTS_URL_PREFIX = API_URL_v1_PREFIX + "/seller/products";

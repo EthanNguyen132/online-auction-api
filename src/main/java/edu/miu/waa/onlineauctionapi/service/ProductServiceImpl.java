@@ -5,9 +5,6 @@ import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.repository.BidRepository;
 import edu.miu.waa.onlineauctionapi.repository.ProductRepository;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,5 +66,11 @@ public class ProductServiceImpl implements ProductService {
               return product;
             })
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<Product> findAllActiveProductsForSettlement() {
+    return productRepository.findByStatusAndBidDueDateBeforeOrderByIdAsc(
+        ProductStatus.RELEASE, LocalDateTime.now());
   }
 }

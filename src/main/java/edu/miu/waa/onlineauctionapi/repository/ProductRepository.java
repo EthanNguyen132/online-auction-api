@@ -26,4 +26,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
   List<Product> findByOwner(String owner);
 
   Optional<List<Product>> findByStatus(ProductStatus status);
+
+  List<Product> findByStatusAndBidDueDateBeforeOrderByIdAsc(
+      ProductStatus status, LocalDateTime bidDueDate);
 }
