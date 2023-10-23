@@ -23,6 +23,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       response.setContentType("application/json;charset=UTF-8");
       response
           .getWriter()
+          //          .print("{ \"status\": 0, \"message\": \" Insufficient permissions \" }");
           .print("{ \"status\": 0, \"message\": \"" + authException.getMessage() + "\" }");
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     } else {

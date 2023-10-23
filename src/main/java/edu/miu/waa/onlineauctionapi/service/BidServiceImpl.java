@@ -98,6 +98,17 @@ public class BidServiceImpl implements BidService {
             .findById(productId)
             .orElseThrow(
                 () -> new BidProcessingException("Product not found with ID: " + productId));
+
+    // check product bid due date
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime bidDueDate = product.getBidDueDate();
+    if (now.isBefore(bidDueDate)) {
+      LOG.info(
+          "Skipping this product since bid due date is not reached yet for product id {}",
+          product.getId());
+      throw new BidProcessingException("This product is not eligible for settlement!");
+    }
+
     settleProductBids(product);
   }
 
@@ -105,15 +116,6 @@ public class BidServiceImpl implements BidService {
   public void settleProductBids(Product product) throws BidProcessingException {
     try {
       LOG.info("Settling bids for product id {}", product.getId());
-      // check product bid due date
-      LocalDateTime now = LocalDateTime.now();
-      LocalDateTime bidDueDate = product.getBidDueDate();
-      if (now.isBefore(bidDueDate)) {
-        LOG.info(
-            "Skipping this product since bid due date is not reached yet for product id {}",
-            product.getId());
-        return;
-      }
 
       List<Bid> allBid = bidRepository.findAllByProductId(product.getId());
       if (allBid.isEmpty()) {
@@ -130,20 +132,22 @@ public class BidServiceImpl implements BidService {
       Bid winnerDeposit =
           bidRepository.findTop1ByProductIdAndUserId(product.getId(), highestBid.getUser().getId());
       User winner = highestBid.getUser();
-      double winnerCurrentBalanceBeforeDesposit =
+      long winnerId = winner.getId();
+      double winnerCurrentBalanceBeforeDeposit =
           winner.getCurrentBalance() + winnerDeposit.getDeposit();
       Date transactionDate = new Date();
 
       LOG.info("settling bids...");
       // check if winner's total balance is enough to pay for the product
-      if (winnerCurrentBalanceBeforeDesposit < highestBid.getBidPrice()) {
+      if (winnerCurrentBalanceBeforeDeposit < highestBid.getBidPrice()) {
         LOG.info(
             "Winner balance is insufficient to pay for the product {} with name {}",
             product.getId(),
             product.getName());
         cancelBids(product, allBid);
-        LOG.info("Processing all refund...");
-        refundAll(product, allDeposits, transactionDate);
+        LOG.info("Processing all refund except winner, who lose their deposit...");
+        //        refundAll(product, allDeposits, transactionDate);
+        refundLosers(product, allDeposits, transactionDate, winnerId);
         LOG.info("This product bid is cancelled due to above reason");
         return;
       }
@@ -152,11 +156,11 @@ public class BidServiceImpl implements BidService {
       settleWinnerDeposit(winnerDeposit);
 
       LOG.info("crediting/debiting to seller/winner...");
-      double winnerFinalBalance = winnerCurrentBalanceBeforeDesposit - soldPrice;
+      double winnerFinalBalance = winnerCurrentBalanceBeforeDeposit - soldPrice;
       settleBilling(product, soldPrice, winner, winnerFinalBalance, highestBid, transactionDate);
 
       LOG.info("Refunding to losers...");
-      refundLosers(product, allDeposits, soldPrice, highestBid, winnerDeposit, transactionDate);
+      refundLosers(product, allDeposits, transactionDate, winnerId);
 
       LOG.info("This product is settled successfully!");
     } catch (Exception e) {
@@ -204,19 +208,9 @@ public class BidServiceImpl implements BidService {
   }
 
   private void refundLosers(
-      Product product,
-      List<Bid> allDeposits,
-      double soldPrice,
-      Bid highestBid,
-      Bid winnerDeposit,
-      Date transactionDate) {
+      Product product, List<Bid> allDeposits, Date transactionDate, long winnerId) {
     allDeposits.stream()
-        .filter(
-            bidDeposit ->
-                !bidDeposit
-                    .getUser()
-                    .getId()
-                    .equals(winnerDeposit.getUser().getId())) // exclude winner
+        .filter(bidDeposit -> !bidDeposit.getUser().getId().equals(winnerId)) // exclude winner
         .forEach(
             bidDeposit -> {
               User user = bidDeposit.getUser();
@@ -236,9 +230,7 @@ public class BidServiceImpl implements BidService {
                           "Refund deposit for product "
                               + product.getId()
                               + ": "
-                              + product.getName()
-                              + " with bid price "
-                              + soldPrice)
+                              + product.getName())
                       .build();
               billingRepository.save(billing);
             });
@@ -277,8 +269,6 @@ public class BidServiceImpl implements BidService {
       double winnerFinalBalance,
       Bid highestBid,
       Date transactionDate) {
-    //    Billing latestBuyerTransaction =
-    // billingRepository.findTop1ByUserIdOrderByTransactionDateDesc(buyer.getId());
     Billing buyerBilling =
         Billing.builder()
             .amount(

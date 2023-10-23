@@ -113,11 +113,9 @@ public class SecurityConfig {
                     .authenticated())
         .oauth2ResourceServer(
             oauth2ResourceServer ->
-                oauth2ResourceServer.jwt(
-                    jwt ->
-                        jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter())
-                            .and()
-                            .authenticationEntryPoint(authenticationEntryPoint)))
+                oauth2ResourceServer
+                    .jwt(jwt -> jwt.jwtAuthenticationConverter(getJwtAuthenticationConverter()))
+                    .authenticationEntryPoint(authenticationEntryPoint))
         .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     return http.build();
   }
