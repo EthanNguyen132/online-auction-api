@@ -1,13 +1,18 @@
 package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
+import edu.miu.waa.onlineauctionapi.common.ProductStatus;
 import edu.miu.waa.onlineauctionapi.dto.ApiResponse;
 import edu.miu.waa.onlineauctionapi.dto.BidResponse;
 import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
 import edu.miu.waa.onlineauctionapi.model.Bid;
+import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.model.User;
 import edu.miu.waa.onlineauctionapi.service.BidService;
+import edu.miu.waa.onlineauctionapi.service.ProductService;
 import edu.miu.waa.onlineauctionapi.service.UserService;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class BidController {
   private final BidService bidService;
   private final UserService userService;
+  private final ProductService productService;
 
   @PostMapping
   public BidResponse addBid(@RequestBody Bid bid) {
@@ -32,8 +38,26 @@ public class BidController {
     }
     bid.setUser(user);
 
-    // check if deposit
-    boolean hasDeposit = bidService.hasDeposit(user.getId(), bid.getProduct().getId());
+    // check if product was expired
+    long productId = bid.getProduct().getId();
+    Product product = productService.getProduct(productId);
+    if (product == null) {
+      return BidResponse.builder().success(false).message("Invalid product").build();
+    } else {
+      // check if expired
+      if (product.getStatus() == ProductStatus.EXPIRED) {
+        return BidResponse.builder().success(false).message("Expired product").build();
+      } else {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime bidDueDate = product.getBidDueDate();
+        if (now.isAfter(bidDueDate)) {
+          return BidResponse.builder().success(false).message("Expired product").build();
+        }
+      }
+    }
+
+    // check if required deposit
+    boolean hasDeposit = bidService.hasDeposit(user.getId(), productId);
     if (!hasDeposit) {
       return BidResponse.builder()
           .success(false)

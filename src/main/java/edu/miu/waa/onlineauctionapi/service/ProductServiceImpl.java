@@ -31,18 +31,7 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public Page<Product> findActiveProductByStatusAndName(String name, Pageable pageable) {
     return productRepository.findByStatusAndNameContainsAndBidDueDateAfterOrderByIdAsc(
-        ProductStatus.RELEASE, name, addDays(0), pageable);
-  }
-
-  private static LocalDateTime addDays(int days) {
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(new Date());
-    cal.add(Calendar.DATE, days); // minus number would decrement the days
-
-    Date input = cal.getTime();
-    LocalDateTime dateTime = input.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-    System.out.println("LocalDateTime" + dateTime);
-    return dateTime;
+        ProductStatus.RELEASE, name, LocalDateTime.now(), pageable);
   }
 
   @Override
