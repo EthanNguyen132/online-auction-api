@@ -2,16 +2,13 @@ package edu.miu.waa.onlineauctionapi.controller;
 
 import edu.miu.waa.onlineauctionapi.common.Constants;
 import edu.miu.waa.onlineauctionapi.common.ProductStatus;
-import edu.miu.waa.onlineauctionapi.dto.ApiResponse;
 import edu.miu.waa.onlineauctionapi.dto.BidResponse;
-import edu.miu.waa.onlineauctionapi.exception.BidProcessingException;
 import edu.miu.waa.onlineauctionapi.model.Bid;
 import edu.miu.waa.onlineauctionapi.model.Product;
 import edu.miu.waa.onlineauctionapi.model.User;
 import edu.miu.waa.onlineauctionapi.service.BidService;
 import edu.miu.waa.onlineauctionapi.service.ProductService;
 import edu.miu.waa.onlineauctionapi.service.UserService;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -83,12 +80,5 @@ public class BidController {
     var history = bidService.findByUserIdOrderByProductIdAscBidDateDesc(userId);
 
     return history;
-  }
-
-  @PostMapping("/settle/{productId}")
-  public ApiResponse<?> settleProductBids(@PathVariable long productId)
-      throws BidProcessingException {
-    bidService.settleProductBidsById(productId);
-    return ApiResponse.builder().success(true).build();
   }
 }
