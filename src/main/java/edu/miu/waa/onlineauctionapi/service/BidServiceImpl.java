@@ -64,9 +64,16 @@ public class BidServiceImpl implements BidService {
     if (user == null) {
       return BidResponse.builder().success(false).message("Invalid user").build();
     }
+
+    // check balance
+    double currentBalance = user.getCurrentBalance();
+    if (currentBalance < bid.getDeposit()) {
+      return BidResponse.builder().success(false).message("Insufficient balance to make a deposit").build();
+    }
+
     // update balance in User table
-    double currentBalance = user.getCurrentBalance() - bid.getDeposit();
-    user.setCurrentBalance(currentBalance);
+    double balance = currentBalance - bid.getDeposit();
+    user.setCurrentBalance(balance);
 
     // save bid
     bid.setUser(user);
