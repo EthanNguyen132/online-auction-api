@@ -67,6 +67,7 @@ public class UserServiceImpl implements UserService {
     }
 
     User user = toEntity(reg); // this can only copy basic props
+    user.setCurrentBalance(10000); // give initial balance for demo
 
     // validate input role first, accept ROLE_SELLER, ROLE_CUSTOMER only
     if (reg.getRole() != RoleEnum.SELLER && reg.getRole() != RoleEnum.CUSTOMER) {
