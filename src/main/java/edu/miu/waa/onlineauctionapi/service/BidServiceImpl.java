@@ -85,7 +85,7 @@ public class BidServiceImpl implements BidService {
     billing.setType(TransactionType.DEBIT.getName());
     billing.setDetails("Deposit for product " + bid.getProduct().getId());
     billing.setTransactionDate(bid.getDepositDate());
-    billing.setBalance(currentBalance);
+    billing.setBalance(balance);
     billing.setUser(user);
     billingRepository.save(billing);
 
